@@ -1,12 +1,55 @@
-import Sidebar from "@/components/dashboard/Sidebar";
-import { students } from "../../../data/student";
+"use client";
 
-export default function StudentsPage() {
+import { useEffect, useState } from "react";
+import Sidebar from "@/components/dashboard/Sidebar";
+import { getAllStudents } from "@/domain/features/students/services/student.service";
+import ProtectedRoute from "@/components/auth/protectedRoutes";
+
+type Student = {
+  _id: string;
+  studentName: string;
+  course: string;
+  email: string;
+  phone: string;
+  semester: string;
+};
+
+function StudentsContent() {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const data = await getAllStudents();
+
+        console.log("STUDENTS DATA:", data);
+
+        setStudents(data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <h1 className="text-xl">Loading Students...</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
 
       <main className="flex-1 p-8">
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-5">
           <h1 className="text-3xl font-bold">Students</h1>
 
@@ -14,89 +57,100 @@ export default function StudentsPage() {
             <input
               type="text"
               placeholder="Search students..."
-              className="w-full sm:w-64 pl-10 pr-4 py-2 bg-slate-900/60 border border-slate-800/80 text-sm rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+              className="
+                w-full sm:w-64
+                pl-4 pr-4 py-2
+                bg-[var(--bg-card)]
+                border border-[var(--border)]
+                text-[var(--text-primary)]
+                placeholder-[var(--text-secondary)]
+                text-sm rounded-xl
+                focus:outline-none
+                focus:ring-2
+                focus:ring-[var(--primary)]
+                focus:border-[var(--primary)]
+                transition-all
+              "
             />
 
-            <button className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/15 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0">
+            <button
+              className="
+                flex items-center justify-center gap-2
+                bg-[var(--primary)]
+                hover:bg-[var(--primary-hover)]
+                text-[var(--text-primary)]
+                px-5 py-2
+                rounded-xl
+                text-sm
+                font-semibold
+                transition-all duration-200
+                hover:-translate-y-0.5
+              "
+            >
               + Add Student
             </button>
           </div>
         </div>
-        {/* {TABLE} */}
-        <div className="rounded-2xl border border-slate-800 overflow-hidden">
+
+        {/* TABLE */}
+        <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
           <table className="w-full table-fixed">
-            <thead className="border-b border-slate-800">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="w-[8%] text-left p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   ID
                 </th>
 
-                <th className="w-[18%] text-left p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Name
+                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                  Student Name
                 </th>
 
-                <th className="w-[15%] text-left p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Course
                 </th>
 
-                <th className="w-[22%] text-left p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Email
                 </th>
 
-                <th className="w-[15%] text-left p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Phone
                 </th>
 
-                <th className="w-[10%] text-left p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Semester
-                </th>
-
-                <th className="w-[12%] text-right p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Actions
                 </th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-800/40">
+            <tbody className="divide-y divide-[var(--border)]">
               {students.map((student) => (
                 <tr
-                  key={student.id}
-                  className="hover:bg-slate-800/30 transition-colors duration-200"
+                  key={student._id}
+                  className="hover:bg-[var(--table-hover)] transition-colors duration-200"
                 >
-                  <td className="p-4 text-sm font-mono text-slate-400">
-                    {student.id}
+                  <td className="p-4 text-sm font-mono text-[var(--text-secondary)]">
+                    {student._id.slice(-6)}
                   </td>
 
-                  <td className="p-4 text-sm font-medium text-white">
-                    {student.name}
+                  <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
+                    {student.studentName}
                   </td>
 
-                  <td className="p-4 text-sm text-slate-300">
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
                     {student.course}
                   </td>
 
-                  <td className="p-4 text-sm text-slate-300">
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
                     {student.email}
                   </td>
 
-                  <td className="p-4 text-sm text-slate-300">
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
                     {student.phone}
                   </td>
 
-                  <td className="p-4 text-sm text-slate-300">
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
                     {student.semester}
-                  </td>
-
-                  <td className="p-4">
-                    <div className="flex justify-end gap-2">
-                      <button className="px-3 py-1 rounded-lg hover:bg-[#526B58] transition-all duration-200">
-                        Edit
-                      </button>
-
-                      <button className="px-3 py-1 rounded-lg hover:bg-red-900 transition-all duration-200">
-                        Delete
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}
@@ -105,5 +159,13 @@ export default function StudentsPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function StudentsPage() {
+  return (
+    <ProtectedRoute>
+      <StudentsContent />
+    </ProtectedRoute>
   );
 }

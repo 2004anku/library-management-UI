@@ -7,7 +7,7 @@ export default function Home() {
       <Sidebar />
 
       <main className="flex-1 p-8">
-        <h1 className="text-2xl font-bold mb-6 tracking-tight text-white">
+        <h1 className="text-[32px] font-bold mb-6 tracking-tight text-white">
           Admin<span className="text-indigo-500">Dashboard</span>
         </h1>
 
