@@ -3,6 +3,7 @@
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { getAllBooks } from "@/domain/features/books/services/book.service";
+import { handleApiError } from "@/utils/errorHandler";
 import { useEffect, useState } from "react";
 
 type Book = {
@@ -16,10 +17,14 @@ type Book = {
 function BooksContent() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const data = await getAllBooks();
 
         console.log("BOOKS API RESPONSE:", data);
@@ -27,6 +32,8 @@ function BooksContent() {
         setBooks(data);
       } catch (error) {
         console.error("Error fetching books:", error);
+
+        setError(handleApiError(error));
       } finally {
         setLoading(false);
       }
@@ -38,7 +45,15 @@ function BooksContent() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl">Loading Books...</h1>
+        <h1 className="text-xl text-[var(--text-primary)]">Loading Books...</h1>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <h1 className="text-xl text-[var(--danger)]">{error}</h1>
       </div>
     );
   }

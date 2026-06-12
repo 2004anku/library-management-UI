@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { getAllRequests } from "@/domain/features/requests/services/request.service";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
+import { requestStatusConfig } from "@/config/requestStatus";
+import { handleApiError } from "@/utils/errorHandler";
 
 type Request = {
   _id: string;
+  status: string;
   studentId?: {
     studentName?: string;
   };
@@ -18,10 +21,14 @@ type Request = {
 function RequestsContent() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const data = await getAllRequests();
 
         console.log("REQUESTS DATA:", data);
@@ -29,6 +36,8 @@ function RequestsContent() {
         setRequests(data);
       } catch (error) {
         console.error("Error fetching requests:", error);
+
+        setError(handleApiError(error));
       } finally {
         setLoading(false);
       }
@@ -40,7 +49,17 @@ function RequestsContent() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl">Loading Requests...</h1>
+        <h1 className="text-xl text-[var(--text-primary)]">
+          Loading Requests...
+        </h1>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <h1 className="text-xl text-[var(--danger)]">{error}</h1>
       </div>
     );
   }
@@ -93,6 +112,10 @@ function RequestsContent() {
                   Book
                 </th>
 
+                <th className="w-[20%] text-left p-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                  STATUS
+                </th>
+
                 <th className="w-[20%] text-right p-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Actions
                 </th>
@@ -118,6 +141,22 @@ function RequestsContent() {
                   </td>
 
                   <td className="p-4">
+                    {request.status && requestStatusConfig[request.status] ? (
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          requestStatusConfig[request.status].className
+                        }`}
+                      >
+                        {requestStatusConfig[request.status].label}
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full text-xs bg-slate-500/20 text-slate-400">
+                        Unknown
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="p-4">
                     <div className="flex justify-end gap-2">
                       <button className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200">
                         Approve
@@ -134,7 +173,7 @@ function RequestsContent() {
               {requests.length === 0 && (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="p-6 text-center text-[var(--text-secondary)]"
                   >
                     No requests found

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { getAllStudents } from "@/domain/features/students/services/student.service";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
+import { handleApiError } from "@/utils/errorHandler";
 
 type Student = {
   _id: string;
@@ -17,10 +18,14 @@ type Student = {
 function StudentsContent() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const data = await getAllStudents();
 
         console.log("STUDENTS DATA:", data);
@@ -28,6 +33,8 @@ function StudentsContent() {
         setStudents(data);
       } catch (error) {
         console.error("Error fetching students:", error);
+
+        setError(handleApiError(error));
       } finally {
         setLoading(false);
       }
@@ -39,7 +46,17 @@ function StudentsContent() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl">Loading Students...</h1>
+        <h1 className="text-xl text-[var(--text-primary)]">
+          Loading Students...
+        </h1>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <h1 className="text-xl text-[var(--danger)]">{error}</h1>
       </div>
     );
   }
@@ -154,6 +171,17 @@ function StudentsContent() {
                   </td>
                 </tr>
               ))}
+
+              {students.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="p-6 text-center text-[var(--text-secondary)]"
+                  >
+                    No students found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

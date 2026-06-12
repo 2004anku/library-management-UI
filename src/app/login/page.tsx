@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "@/lib/axios";
 import { loginUser } from "@/domain/features/auth/services/auth.service";
+import { handleApiError } from "@/utils/errorHandler";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,15 +18,16 @@ export default function LoginPage() {
       setLoading(true);
       setError("");
 
-      const res = await loginUser({
+      await loginUser({
         email,
         password,
       });
-      console.log("LOGIN RESPONSE:", res);
 
       router.push("/");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Login failed, try again");
+    } catch (err) {
+      console.error("Login Error:", err);
+
+      setError(handleApiError(err));
     } finally {
       setLoading(false);
     }
@@ -44,6 +45,7 @@ export default function LoginPage() {
           type="email"
           placeholder="Email"
           className="w-full mb-4 px-4 py-3 rounded-xl bg-[#0f172a] border border-[#1e293b] text-white outline-none focus:border-indigo-500"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
@@ -52,6 +54,7 @@ export default function LoginPage() {
           type="password"
           placeholder="Password"
           className="w-full mb-4 px-4 py-3 rounded-xl bg-[#0f172a] border border-[#1e293b] text-white outline-none focus:border-indigo-500"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
@@ -62,7 +65,7 @@ export default function LoginPage() {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-semibold transition"
+          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white py-3 rounded-xl font-semibold transition"
         >
           {loading ? "Logging in..." : "Login"}
         </button>
