@@ -5,15 +5,7 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import { getAllStudents } from "@/domain/features/students/services/student.service";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import { handleApiError } from "@/utils/errorHandler";
-
-type Student = {
-  _id: string;
-  studentName: string;
-  course: string;
-  email: string;
-  phone: string;
-  semester: string;
-};
+import type { Student } from "@/domain/features/students/types/studentType";
 
 function StudentsContent() {
   const [students, setStudents] = useState<Student[]>([]);

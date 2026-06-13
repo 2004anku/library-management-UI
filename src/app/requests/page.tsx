@@ -6,17 +6,7 @@ import { getAllRequests } from "@/domain/features/requests/services/request.serv
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import { requestStatusConfig } from "@/config/requestStatus";
 import { handleApiError } from "@/utils/errorHandler";
-
-type Request = {
-  _id: string;
-  status: string;
-  studentId?: {
-    studentName?: string;
-  };
-  bookId?: {
-    bookName?: string;
-  };
-};
+import type { Request } from "@/domain/features/requests/types/requestTypes";
 
 function RequestsContent() {
   const [requests, setRequests] = useState<Request[]>([]);

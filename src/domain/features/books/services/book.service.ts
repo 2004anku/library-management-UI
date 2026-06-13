@@ -1,4 +1,4 @@
-import api from "@/lib/axios";
+import api from "@/lib/axios/axios";
 
 export const getAllBooks = async () => {
   const response = await api.get("/admin/books/all-books");

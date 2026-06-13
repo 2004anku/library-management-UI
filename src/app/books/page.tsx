@@ -5,14 +5,7 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import { getAllBooks } from "@/domain/features/books/services/book.service";
 import { handleApiError } from "@/utils/errorHandler";
 import { useEffect, useState } from "react";
-
-type Book = {
-  _id: string;
-  bookName: string;
-  author: string;
-  category: string;
-  availableCopies: number;
-};
+import type { Book } from "@/domain/features/books/types/booktype";
 
 function BooksContent() {
   const [books, setBooks] = useState<Book[]>([]);
