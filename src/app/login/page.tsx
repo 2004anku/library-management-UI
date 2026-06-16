@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Mail, Lock, Eye, EyeOff, BookOpen } from "lucide-react";
+
 import { loginUser } from "@/domain/features/auth/services/auth.service";
 import { handleApiError } from "@/utils/errorHandler";
 
@@ -10,10 +12,15 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     try {
       setLoading(true);
       setError("");
@@ -25,8 +32,6 @@ export default function LoginPage() {
 
       router.push("/");
     } catch (err) {
-      console.error("Login Error:", err);
-
       setError(handleApiError(err));
     } finally {
       setLoading(false);
@@ -34,41 +39,310 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B1220]">
-      <div className="w-full max-w-md bg-[#111827] p-8 rounded-2xl border border-[#1e293b] shadow-xl">
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Admin Login
-        </h1>
+    <div
+      className="
+        min-h-screen
+        bg-[var(--bg-primary)]
+        flex items-center justify-center
+        p-4
+        relative
+        overflow-hidden
+      "
+    >
+      {/* Background Glow */}
+      <div
+        className="
+          absolute top-1/4 left-1/4
+          w-96 h-96
+          bg-[var(--primary)]/10
+          rounded-full
+          blur-3xl
+          pointer-events-none
+        "
+      />
 
-        {/* EMAIL */}
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full mb-4 px-4 py-3 rounded-xl bg-[#0f172a] border border-[#1e293b] text-white outline-none focus:border-indigo-500"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <div
+        className="
+          absolute bottom-1/4 right-1/4
+          w-96 h-96
+          bg-[var(--primary)]/5
+          rounded-full
+          blur-3xl
+          pointer-events-none
+        "
+      />
 
-        {/* PASSWORD */}
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-4 px-4 py-3 rounded-xl bg-[#0f172a] border border-[#1e293b] text-white outline-none focus:border-indigo-500"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+      {/* Card */}
+      <div
+        className="
+          w-full max-w-md
+          bg-[var(--bg-sidebar)]
+          rounded-2xl
+          border border-[var(--border)]
+          p-8
+          shadow-2xl
+          relative z-10
+        "
+      >
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div
+            className="
+              inline-flex
+              items-center justify-center
+              p-3
+              rounded-xl
+              mb-4
+              bg-[var(--primary)]/10
+              text-[var(--primary)]
+            "
+          >
+            <BookOpen size={28} />
+          </div>
 
-        {/* ERROR */}
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+          <h1
+            className="
+              text-2xl
+              font-bold
+              heading-font
+              text-[var(--text-primary)]
+              tracking-tight
+            "
+          >
+            Book
+            <span className="text-[var(--primary)]">Hub</span>
+          </h1>
 
-        {/* BUTTON */}
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white py-3 rounded-xl font-semibold transition"
+          <p
+            className="
+              text-sm
+              text-[var(--text-secondary)]
+              mt-1
+            "
+          >
+            Welcome back! Please enter your details.
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          {/* Email */}
+          <div className="space-y-2">
+            <label
+              className="
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wider
+                text-[var(--text-secondary)]
+              "
+            >
+              Email Address
+            </label>
+
+            <div className="relative">
+              <span
+                className="
+                  absolute inset-y-0 left-0
+                  flex items-center
+                  pl-3
+                  text-[var(--text-secondary)]
+                "
+              >
+                <Mail size={18} />
+              </span>
+
+              <input
+                type="email"
+                required
+                placeholder="admin@bookhub.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="
+                  w-full
+                  bg-[var(--bg-card)]
+                  border border-[var(--border)]
+                  text-[var(--text-primary)]
+                  placeholder-[var(--text-secondary)]
+                  pl-10 pr-4 py-3
+                  rounded-xl
+                  outline-none
+                  text-sm
+                  focus:border-[var(--primary)]
+                  focus:ring-1
+                  focus:ring-[var(--primary)]
+                  transition-all
+                "
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="space-y-2">
+            <div
+              className="
+                flex
+                justify-between
+                items-center
+              "
+            >
+              <label
+                className="
+                  text-xs
+                  font-semibold
+                  uppercase
+                  tracking-wider
+                  text-[var(--text-secondary)]
+                "
+              >
+                Password
+              </label>
+
+              <button
+                type="button"
+                className="
+                  text-xs
+                  text-[var(--primary)]
+                  hover:underline
+                "
+              >
+                Forgot password?
+              </button>
+            </div>
+
+            <div className="relative">
+              <span
+                className="
+                  absolute inset-y-0 left-0
+                  flex items-center
+                  pl-3
+                  text-[var(--text-secondary)]
+                "
+              >
+                <Lock size={18} />
+              </span>
+
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="
+                  w-full
+                  bg-[var(--bg-card)]
+                  border border-[var(--border)]
+                  text-[var(--text-primary)]
+                  placeholder-[var(--text-secondary)]
+                  pl-10 pr-10 py-3
+                  rounded-xl
+                  outline-none
+                  text-sm
+                  focus:border-[var(--primary)]
+                  focus:ring-1
+                  focus:ring-[var(--primary)]
+                  transition-all
+                "
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="
+                  absolute inset-y-0 right-0
+                  flex items-center
+                  pr-3
+                  text-[var(--text-secondary)]
+                  hover:text-[var(--text-primary)]
+                  transition-colors
+                "
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember Me */}
+          <div className="flex items-center">
+            <input
+              id="remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="
+                h-4 w-4
+                accent-[var(--primary)]
+              "
+            />
+
+            <label
+              htmlFor="remember-me"
+              className="
+                ml-2
+                text-xs
+                select-none
+                text-[var(--text-secondary)]
+              "
+            >
+              Remember me for 30 days
+            </label>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p
+              className="
+                text-sm
+                text-[var(--danger)]
+              "
+            >
+              {error}
+            </p>
+          )}
+
+          {/* Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="
+              w-full
+              mt-2
+              bg-[var(--primary)]
+              hover:bg-[var(--primary-hover)]
+              disabled:opacity-50
+              text-[var(--text-primary)]
+              font-medium
+              py-3
+              rounded-xl
+              transition-all
+              active:scale-[0.98]
+            "
+          >
+            {loading ? "Logging in..." : "Log In"}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <p
+          className="
+            text-center
+            text-xs
+            text-[var(--text-secondary)]
+            mt-6
+          "
         >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+          Don't have an account?{" "}
+          <button
+            type="button"
+            className="
+              text-[var(--primary)]
+              font-medium
+              hover:underline
+            "
+          >
+            Contact Super Admin
+          </button>
+        </p>
       </div>
     </div>
   );

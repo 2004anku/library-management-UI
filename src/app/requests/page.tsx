@@ -2,58 +2,76 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { getAllRequests } from "@/domain/features/requests/services/request.service";
+import {
+  getAllRequests,
+  approveRequest,
+  rejectRequest,
+} from "@/domain/features/requests/services/request.service";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import { requestStatusConfig } from "@/config/requestStatus";
 import { handleApiError } from "@/utils/errorHandler";
 import type { Request } from "@/domain/features/requests/types/requestTypes";
+import LoadingState from "@/components/ui/loadingState";
+import ErrorState from "@/components/ui/errorState";
+import EmptyState from "@/components/ui/emptyState";
 
 function RequestsContent() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getAllRequests();
+
+      setRequests(data);
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+
+      setError(handleApiError(error));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data = await getAllRequests();
-
-        console.log("REQUESTS DATA:", data);
-
-        setRequests(data);
-      } catch (error) {
-        console.error("Error fetching requests:", error);
-
-        setError(handleApiError(error));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRequests();
   }, []);
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl text-[var(--text-primary)]">
-          Loading Requests...
-        </h1>
-      </div>
-    );
+    return <LoadingState message="" />;
   }
 
   if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl text-[var(--danger)]">{error}</h1>
-      </div>
-    );
+    return <ErrorState message={error} />;
   }
 
+  if (requests.length === 0) {
+    return <EmptyState message="No requests found." />;
+  }
+  const handleApprove = async (issueId: string) => {
+    try {
+      await approveRequest(issueId);
+
+      await fetchRequests();
+    } catch (error) {
+      console.error("Approve Error:", error);
+
+      alert(handleApiError(error));
+    }
+  };
+  const handleReject = async (issueId: string) => {
+    try {
+      await rejectRequest(issueId);
+
+      await fetchRequests();
+    } catch (error) {
+      console.error("Reject Error:", error);
+
+      alert(handleApiError(error));
+    }
+  };
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -61,7 +79,7 @@ function RequestsContent() {
       <main className="flex-1 p-8">
         {/* HEADER */}
         <div className="flex justify-between items-center mb-5">
-          <h1 className="text-3xl font-bold">Requests</h1>
+          <h1 className="heading-font text-3xl font-bold">Requests</h1>
 
           <div className="flex gap-3">
             <input
@@ -148,11 +166,17 @@ function RequestsContent() {
 
                   <td className="p-4">
                     <div className="flex justify-end gap-2">
-                      <button className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200">
+                      <button
+                        onClick={() => handleApprove(request._id)}
+                        className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200"
+                      >
                         Approve
                       </button>
 
-                      <button className="px-3 py-1 rounded-lg hover:bg-[var(--danger)] transition-all duration-200">
+                      <button
+                        onClick={() => handleReject(request._id)}
+                        className="px-3 py-1 rounded-lg hover:bg-[var(--danger)] transition-all duration-200"
+                      >
                         Reject
                       </button>
                     </div>

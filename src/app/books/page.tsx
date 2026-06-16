@@ -2,62 +2,79 @@
 
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { getAllBooks } from "@/domain/features/books/services/book.service";
+import {
+  getAllBooks,
+  deleteBook,
+} from "@/domain/features/books/services/book.service";
 import { handleApiError } from "@/utils/errorHandler";
 import { useEffect, useState } from "react";
-import type { Book } from "@/domain/features/books/types/booktype";
+import type { Book } from "@/domain/features/books/types/bookType";
+import LoadingState from "@/components/ui/loadingState";
+import ErrorState from "@/components/ui/errorState";
+import EmptyState from "@/components/ui/emptyState";
+import EditBookModal from "@/components/book/EditBookModel";
 
 function BooksContent() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
+  const fetchBooks = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getAllBooks();
+
+      setBooks(data);
+    } catch (error) {
+      setError(handleApiError(error));
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data = await getAllBooks();
-
-        console.log("BOOKS API RESPONSE:", data);
-
-        setBooks(data);
-      } catch (error) {
-        console.error("Error fetching books:", error);
-
-        setError(handleApiError(error));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBooks();
   }, []);
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl text-[var(--text-primary)]">Loading Books...</h1>
-      </div>
-    );
+    return <LoadingState message="" />;
   }
 
   if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl text-[var(--danger)]">{error}</h1>
-      </div>
-    );
+    return <ErrorState message={error} />;
   }
 
+  if (books.length === 0) {
+    return <EmptyState message="No books found." />;
+  }
+  const handleDelete = async (bookId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this book?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteBook(bookId);
+
+      await fetchBooks();
+    } catch (error) {
+      alert(handleApiError(error));
+    }
+  };
+  const handleEdit = (book: Book) => {
+    setSelectedBook(book);
+    setShowEditModal(true);
+  };
   return (
     <div className="flex min-h-screen">
       <Sidebar />
 
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-5">
-          <h1 className="text-3xl font-bold">Books</h1>
+          <h1 className="heading-font text-3xl font-bold">Books</h1>
 
           <div className="flex gap-3">
             <input
@@ -140,11 +157,17 @@ function BooksContent() {
 
                   <td className="p-4">
                     <div className="flex justify-end gap-2">
-                      <button className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200">
+                      <button
+                        onClick={() => handleEdit(book)}
+                        className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200"
+                      >
                         Edit
                       </button>
 
-                      <button className="px-3 py-1 rounded-lg hover:bg-[var(--danger)] transition-all duration-200">
+                      <button
+                        onClick={() => handleDelete(book._id)}
+                        className="px-3 py-1 rounded-lg hover:bg-[var(--danger)] transition-all duration-200"
+                      >
                         Delete
                       </button>
                     </div>
@@ -155,6 +178,16 @@ function BooksContent() {
           </table>
         </div>
       </main>
+      {showEditModal && selectedBook && (
+        <EditBookModal
+          book={selectedBook}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedBook(null);
+          }}
+          onSuccess={fetchBooks}
+        />
+      )}
     </div>
   );
 }

@@ -7,7 +7,7 @@ export const handleApiError = (error: any): string => {
 
   switch (status) {
     case 401:
-      return "Session expired. Please login again.";
+      return "Please login again.";
 
     case 403:
       return "You are not allowed to perform this action.";

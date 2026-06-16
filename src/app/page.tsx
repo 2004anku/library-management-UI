@@ -6,6 +6,9 @@ import StatsCard from "@/components/dashboard/StatsCard";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import { getDashboardStats } from "@/domain/features/dashboard/services/dashboard.service";
 import { handleApiError } from "@/utils/errorHandler";
+import LoadingState from "@/components/ui/loadingState";
+import ErrorState from "@/components/ui/errorState";
+
 type Stats = {
   totalStudents: number;
   totalBooks: number;
@@ -41,28 +44,18 @@ function DashboardContent() {
 
     fetchStats();
   }, []);
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Loading...
-      </div>
-    );
-  }
 
   if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">
-        {error}
-      </div>
-    );
+    return <ErrorState message={error} />;
   }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
 
       <main className="flex-1 p-8">
-        <h1 className="text-[32px] font-bold mb-6 tracking-tight text-white">
-          Admin<span className="text-indigo-500">Dashboard</span>
+        <h1 className="heading-fonttext-[32px] font-bold mb-6 tracking-tight text-white">
+          Admin<span className="heading-font text-indigo-500">Dashboard</span>
         </h1>
 
         <div className="grid grid-cols-3 gap-4">

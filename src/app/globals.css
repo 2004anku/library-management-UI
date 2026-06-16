@@ -25,7 +25,8 @@
   /* Table */
   --table-hover: rgba(51, 65, 85, 0.3);
 
-  /* Typography */
+  /* Fonts */
+  --font-heading: "Gilroy", sans-serif;
   --font-primary: "Inter", sans-serif;
 
   /* Font Sizes */
@@ -38,4 +39,8 @@
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
+  font-family: var(--font-primary);
+}
+.heading-font {
+  font-family: var(--font-heading);
 }

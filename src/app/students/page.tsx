@@ -2,57 +2,96 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { getAllStudents } from "@/domain/features/students/services/student.service";
+import {
+  getAllStudents,
+  deleteStudent,
+  updateStudent,
+} from "@/domain/features/students/services/student.service";
+
+import EditStudentModal from "@/components/students/EditStudentModel";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import { handleApiError } from "@/utils/errorHandler";
 import type { Student } from "@/domain/features/students/types/studentType";
+import LoadingState from "@/components/ui/loadingState";
+import ErrorState from "@/components/ui/errorState";
+import EmptyState from "@/components/ui/emptyState";
 
 function StudentsContent() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
 
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getAllStudents();
+
+      setStudents(data);
+    } catch (error) {
+      setError(handleApiError(error));
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data = await getAllStudents();
-
-        console.log("STUDENTS DATA:", data);
-
-        setStudents(data);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-
-        setError(handleApiError(error));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStudents();
   }, []);
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl text-[var(--text-primary)]">
-          Loading Students...
-        </h1>
-      </div>
-    );
+    return <LoadingState message="" />;
   }
 
   if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl text-[var(--danger)]">{error}</h1>
-      </div>
-    );
+    return <ErrorState message={error} />;
   }
 
+  if (students.length === 0) {
+    return <EmptyState message="No students found." />;
+  }
+
+  const handleDelete = async (studentId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this student?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteStudent(studentId);
+
+      await fetchStudents();
+    } catch (error) {
+      alert(handleApiError(error));
+    }
+  };
+
+  const handleEdit = (student: Student) => {
+    setSelectedStudent(student);
+
+    setShowEditModal(true);
+  };
+
+  const handleUpdate = async (
+    data: Partial<Student> & { password?: string },
+  ) => {
+    if (!selectedStudent) return;
+
+    try {
+      await updateStudent(selectedStudent._id, data);
+
+      setShowEditModal(false);
+
+      setSelectedStudent(null);
+
+      await fetchStudents();
+    } catch (error) {
+      alert(handleApiError(error));
+    }
+  };
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -60,7 +99,7 @@ function StudentsContent() {
       <main className="flex-1 p-8">
         {/* HEADER */}
         <div className="flex justify-between items-center mb-5">
-          <h1 className="text-3xl font-bold">Students</h1>
+          <h1 className="heading-font text-3xl font-bold">Students</h1>
 
           <div className="flex gap-3">
             <input
@@ -129,6 +168,9 @@ function StudentsContent() {
                 <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   Semester
                 </th>
+                <th className="p-4 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                  Action
+                </th>
               </tr>
             </thead>
 
@@ -161,22 +203,38 @@ function StudentsContent() {
                   <td className="p-4 text-sm text-[var(--text-secondary)]">
                     {student.semester}
                   </td>
-                </tr>
-              ))}
+                  <td className="p-4">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => handleEdit(student)}
+                        className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200"
+                      >
+                        Edit
+                      </button>
 
-              {students.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="p-6 text-center text-[var(--text-secondary)]"
-                  >
-                    No students found
+                      <button
+                        onClick={() => handleDelete(student._id)}
+                        className="px-3 py-1 rounded-lg hover:bg-[var(--danger)] transition-all duration-200"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
+        {showEditModal && selectedStudent && (
+          <EditStudentModal
+            student={selectedStudent}
+            onClose={() => {
+              setShowEditModal(false);
+              setSelectedStudent(null);
+            }}
+            onSave={handleUpdate}
+          />
+        )}
       </main>
     </div>
   );

@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Rajdhani } from "next/font/google";
 import "./globals.css";
-import GlobalLoader from "@/components/globalLoader/globalLoader";
+import GlobalLoader from "@/components/GlobalLoader/globalLoader";
 const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-primary",
+});
+
+const rajdhani = Rajdhani({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-heading",
 });
 
 export const metadata: Metadata = {
@@ -18,7 +25,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className={`${inter.className} min-h-full flex flex-col`}>
+      <body
+        className={`
+    ${inter.variable}
+    ${rajdhani.variable}
+    min-h-full
+    flex flex-col
+  `}
+      >
         <GlobalLoader />
         {children}
       </body>

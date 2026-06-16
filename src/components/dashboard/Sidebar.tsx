@@ -17,7 +17,7 @@ export default function Sidebar() {
   const router = useRouter();
 
   const handleLogout = () => {
-    logoutUser(); // token aur user remove karega
+    logoutUser();
     router.replace("/login");
   };
   return (
@@ -34,9 +34,7 @@ export default function Sidebar() {
           </h1>
 
           <div className="mt-4 bg-[var(--bg-card)] rounded-xl p-4">
-            <h2 className="font-semibold text-[var(--text-primary)]">
-              Ankit Choudhary
-            </h2>
+            <h2 className="font-semibold text-[var(--text-primary)]">Vikram</h2>
 
             <p className="text-sm text-[var(--text-secondary)]">
               admin@bookhub.com

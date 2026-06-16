@@ -5,3 +5,19 @@ export const getAllRequests = async () => {
 
   return response.data.data;
 };
+
+export const approveRequest = async (issueId: string) => {
+  const response = await api.patch(
+    `/admin/book-circulation/approve-request/${issueId}`,
+  );
+
+  return response.data;
+};
+
+export const rejectRequest = async (issueId: string) => {
+  const response = await api.patch(
+    `/admin/book-circulation/reject-request/${issueId}`,
+  );
+
+  return response.data;
+};
