@@ -21,3 +21,8 @@ export const updateBook = async (bookId: string, bookData: Partial<Book>) => {
 
   return response.data.data;
 };
+export const createBook = async (bookData: Omit<Book, "_id">) => {
+  const response = await api.post("/admin/books/create-book", bookData);
+
+  return response.data.data;
+};

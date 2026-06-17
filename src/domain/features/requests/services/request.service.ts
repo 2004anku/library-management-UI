@@ -21,3 +21,11 @@ export const rejectRequest = async (issueId: string) => {
 
   return response.data;
 };
+export const updateRequestStatus = async (issueId: string, status: string) => {
+  const response = await api.patch(
+    `/admin/book-circulation/update-request-status/${issueId}`,
+    { status },
+  );
+
+  return response.data;
+};

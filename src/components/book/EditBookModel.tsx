@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Book } from "@/domain/features/books/types/bookType";
 import { updateBook } from "@/domain/features/books/services/book.service";
 import { handleApiError } from "@/utils/errorHandler";
+import toast from "react-hot-toast";
 
 type EditBookModalProps = {
   book: Book;
@@ -45,17 +46,16 @@ export default function EditBookModal({
         price: formData.price,
       });
 
-      alert("Book updated successfully");
+      toast.success("Book updated successfully");
 
       onSuccess();
       onClose();
     } catch (error) {
-      alert(handleApiError(error));
+      toast.error(handleApiError(error));
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-[var(--bg-sidebar)] rounded-2xl p-6 w-full max-w-lg border border-[var(--border)]">

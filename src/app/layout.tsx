@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Rajdhani } from "next/font/google";
 import "./globals.css";
 import GlobalLoader from "@/components/GlobalLoader/globalLoader";
+import { Toaster } from "react-hot-toast";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-primary",
@@ -34,6 +36,7 @@ export default function RootLayout({
   `}
       >
         <GlobalLoader />
+        <Toaster position="top-right" />
         {children}
       </body>
     </html>

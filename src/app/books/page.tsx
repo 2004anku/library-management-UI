@@ -5,6 +5,7 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import {
   getAllBooks,
   deleteBook,
+  updateBook,
 } from "@/domain/features/books/services/book.service";
 import { handleApiError } from "@/utils/errorHandler";
 import { useEffect, useState } from "react";
@@ -13,6 +14,8 @@ import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
 import EditBookModal from "@/components/book/EditBookModel";
+import { Pencil, Trash2 } from "lucide-react";
+import AddBookModal from "@/components/book/AddBookModel";
 
 function BooksContent() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -20,6 +23,7 @@ function BooksContent() {
   const [error, setError] = useState("");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const fetchBooks = async () => {
     try {
@@ -60,14 +64,15 @@ function BooksContent() {
       await deleteBook(bookId);
 
       await fetchBooks();
-    } catch (error) {
-      alert(handleApiError(error));
-    }
+    } catch (error) {}
   };
+
   const handleEdit = (book: Book) => {
     setSelectedBook(book);
+
     setShowEditModal(true);
   };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -97,18 +102,17 @@ function BooksContent() {
             />
 
             <button
+              onClick={() => setShowAddModal(true)}
               className="
-                flex items-center justify-center gap-2
-                bg-[var(--primary)]
-                hover:bg-[var(--primary-hover)]
-                text-[var(--text-primary)]
-                px-5 py-2
-                rounded-xl
-                text-sm
-                font-semibold
-                transition-all duration-200
-                hover:-translate-y-0.5
-              "
+    flex items-center justify-center gap-2
+    bg-[var(--primary)]
+    hover:bg-[var(--primary-hover)]
+    text-[var(--text-primary)]
+    px-5 py-2
+    rounded-xl
+    text-sm
+    font-semibold
+  "
             >
               + Add Book
             </button>
@@ -138,15 +142,14 @@ function BooksContent() {
             </thead>
 
             <tbody className="divide-y divide-[var(--border)]">
-              {books.map((book) => (
+              {books.map((book, index) => (
                 <tr
                   key={book._id}
                   className="hover:bg-[var(--table-hover)] transition-colors duration-200"
                 >
-                  <td className="p-4 text-sm font-mono text-[var(--text-secondary)]">
-                    {book._id.slice(-6)}
+                  <td className="p-4 text-sm font-medium text-[var(--text-secondary)]">
+                    {index + 1}
                   </td>
-
                   <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
                     {book.bookName}
                   </td>
@@ -159,16 +162,16 @@ function BooksContent() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => handleEdit(book)}
-                        className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200"
+                        className="p-2 rounded-lg hover:bg-[var(--success)]/20 transition-all duration-200"
                       >
-                        Edit
+                        <Pencil size={18} />
                       </button>
 
                       <button
                         onClick={() => handleDelete(book._id)}
-                        className="px-3 py-1 rounded-lg hover:bg-[var(--danger)] transition-all duration-200"
+                        className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
                       >
-                        Delete
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </td>
@@ -185,6 +188,12 @@ function BooksContent() {
             setShowEditModal(false);
             setSelectedBook(null);
           }}
+          onSuccess={fetchBooks}
+        />
+      )}
+      {showAddModal && (
+        <AddBookModal
+          onClose={() => setShowAddModal(false)}
           onSuccess={fetchBooks}
         />
       )}

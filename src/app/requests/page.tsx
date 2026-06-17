@@ -6,6 +6,7 @@ import {
   getAllRequests,
   approveRequest,
   rejectRequest,
+  updateRequestStatus,
 } from "@/domain/features/requests/services/request.service";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import { requestStatusConfig } from "@/config/requestStatus";
@@ -14,11 +15,16 @@ import type { Request } from "@/domain/features/requests/types/requestTypes";
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
+import { Check, X, Pencil } from "lucide-react";
+import toast from "react-hot-toast";
 
 function RequestsContent() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState("");
   const fetchRequests = async () => {
     try {
       setLoading(true);
@@ -54,22 +60,38 @@ function RequestsContent() {
     try {
       await approveRequest(issueId);
 
+      toast.success("Request approved successfully");
+
       await fetchRequests();
     } catch (error) {
-      console.error("Approve Error:", error);
-
-      alert(handleApiError(error));
+      toast.error(handleApiError(error));
     }
   };
   const handleReject = async (issueId: string) => {
     try {
       await rejectRequest(issueId);
 
+      toast.success("Request reject successfully");
+
       await fetchRequests();
     } catch (error) {
-      console.error("Reject Error:", error);
+      toast.error(handleApiError(error));
+    }
+  };
+  const handleUpdateStatus = async () => {
+    if (!selectedRequest) return;
 
-      alert(handleApiError(error));
+    try {
+      await updateRequestStatus(selectedRequest._id, selectedStatus);
+
+      setShowEditModal(false);
+      setSelectedRequest(null);
+
+      toast.success("Request updated successfully");
+
+      await fetchRequests();
+    } catch (error) {
+      toast.error(handleApiError(error));
     }
   };
   return (
@@ -131,13 +153,13 @@ function RequestsContent() {
             </thead>
 
             <tbody className="divide-y divide-[var(--border)]">
-              {requests.map((request) => (
+              {requests.map((request, index) => (
                 <tr
                   key={request._id}
                   className="hover:bg-[var(--table-hover)] transition-colors duration-200"
                 >
                   <td className="p-4 text-sm font-mono text-[var(--text-secondary)]">
-                    {request._id.slice(-6)}
+                    {index + 1}
                   </td>
 
                   <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
@@ -170,14 +192,24 @@ function RequestsContent() {
                         onClick={() => handleApprove(request._id)}
                         className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200"
                       >
-                        Approve
+                        <Check size={18} />
                       </button>
 
                       <button
                         onClick={() => handleReject(request._id)}
-                        className="px-3 py-1 rounded-lg hover:bg-[var(--danger)] transition-all duration-200"
+                        className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
                       >
-                        Reject
+                        <X size={18} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedRequest(request);
+                          setSelectedStatus(request.status);
+                          setShowEditModal(true);
+                        }}
+                        className="p-2 rounded-lg hover:bg-blue-500/20 transition-all duration-200"
+                      >
+                        <Pencil size={18} />
                       </button>
                     </div>
                   </td>
@@ -197,6 +229,40 @@ function RequestsContent() {
             </tbody>
           </table>
         </div>
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-[var(--bg-card)] p-6 rounded-xl w-[400px]">
+              <h2 className="text-xl font-bold mb-4">Edit Request Status</h2>
+
+              <label className="block text-sm mb-2">Status</label>
+
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full border p-2 rounded-lg mb-4 bg-transparent"
+              >
+                <option value="issued">Issued</option>
+                <option value="rejected">Rejected</option>
+              </select>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 rounded-lg border"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleUpdateStatus}
+                  className="px-4 py-2 rounded-lg bg-blue-600"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

@@ -7,4 +7,5 @@ export type Book = {
   totalCopies: number;
   isbn: string;
   price: number;
+  libraryId?: string;
 };

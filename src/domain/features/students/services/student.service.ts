@@ -25,3 +25,15 @@ export const updateStudent = async (
 
   return response.data.data;
 };
+export const createStudent = async (studentData: {
+  studentName: string;
+  email: string;
+  password: string;
+  phone: string;
+  course: string;
+  semester: number;
+}) => {
+  const response = await api.post("/admin/student/create-student", studentData);
+
+  return response.data.data;
+};

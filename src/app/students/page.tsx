@@ -15,15 +15,17 @@ import type { Student } from "@/domain/features/students/types/studentType";
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
+import { Pencil, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+import AddStudentModal from "@/components/students/AddStudentModel";
 
 function StudentsContent() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
-
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-
+  const [showAddModal, setShowAddModal] = useState(false);
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -52,7 +54,6 @@ function StudentsContent() {
   if (students.length === 0) {
     return <EmptyState message="No students found." />;
   }
-
   const handleDelete = async (studentId: string) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this student?",
@@ -63,9 +64,11 @@ function StudentsContent() {
     try {
       await deleteStudent(studentId);
 
+      toast.success("Student deleted successfully");
+
       await fetchStudents();
     } catch (error) {
-      alert(handleApiError(error));
+      toast.error(handleApiError(error));
     }
   };
 
@@ -83,13 +86,15 @@ function StudentsContent() {
     try {
       await updateStudent(selectedStudent._id, data);
 
+      toast.success("Student updated successfully");
+
       setShowEditModal(false);
 
       setSelectedStudent(null);
 
       await fetchStudents();
     } catch (error) {
-      alert(handleApiError(error));
+      toast.error(handleApiError(error));
     }
   };
   return (
@@ -122,18 +127,17 @@ function StudentsContent() {
             />
 
             <button
+              onClick={() => setShowAddModal(true)}
               className="
-                flex items-center justify-center gap-2
-                bg-[var(--primary)]
-                hover:bg-[var(--primary-hover)]
-                text-[var(--text-primary)]
-                px-5 py-2
-                rounded-xl
-                text-sm
-                font-semibold
-                transition-all duration-200
-                hover:-translate-y-0.5
-              "
+    flex items-center justify-center gap-2
+    bg-[var(--primary)]
+    hover:bg-[var(--primary-hover)]
+    text-[var(--text-primary)]
+    px-5 py-2
+    rounded-xl
+    text-sm
+    font-semibold
+  "
             >
               + Add Student
             </button>
@@ -175,13 +179,13 @@ function StudentsContent() {
             </thead>
 
             <tbody className="divide-y divide-[var(--border)]">
-              {students.map((student) => (
+              {students.map((student, index) => (
                 <tr
                   key={student._id}
                   className="hover:bg-[var(--table-hover)] transition-colors duration-200"
                 >
                   <td className="p-4 text-sm font-mono text-[var(--text-secondary)]">
-                    {student._id.slice(-6)}
+                    {index + 1}
                   </td>
 
                   <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
@@ -207,16 +211,16 @@ function StudentsContent() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => handleEdit(student)}
-                        className="px-3 py-1 rounded-lg hover:bg-[var(--success)] transition-all duration-200"
+                        className="p-2 rounded-lg hover:bg-[var(--success)]/20 transition-all duration-200"
                       >
-                        Edit
+                        <Pencil size={18} />
                       </button>
 
                       <button
                         onClick={() => handleDelete(student._id)}
-                        className="px-3 py-1 rounded-lg hover:bg-[var(--danger)] transition-all duration-200"
+                        className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
                       >
-                        Delete
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </td>
@@ -233,6 +237,12 @@ function StudentsContent() {
               setSelectedStudent(null);
             }}
             onSave={handleUpdate}
+          />
+        )}
+        {showAddModal && (
+          <AddStudentModal
+            onClose={() => setShowAddModal(false)}
+            onSuccess={fetchStudents}
           />
         )}
       </main>
