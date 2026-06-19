@@ -29,3 +29,12 @@ export const updateRequestStatus = async (issueId: string, status: string) => {
 
   return response.data;
 };
+export const assignBook = async (data: {
+  studentId: string;
+  bookId: string;
+  dueDate?: string;
+}) => {
+  const response = await api.post("/admin/book-circulation/assign-book", data);
+
+  return response.data;
+};

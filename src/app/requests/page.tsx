@@ -17,6 +17,15 @@ import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
 import { Check, X, Pencil } from "lucide-react";
 import toast from "react-hot-toast";
+import AssignBookModal from "@/components/request/AssignBookModal";
+
+import { getAllStudents } from "@/domain/features/students/services/student.service";
+
+import { getAllBooks } from "@/domain/features/books/services/book.service";
+
+import type { Student } from "@/domain/features/students/types/studentType";
+
+import type { Book } from "@/domain/features/books/types/bookType";
 
 function RequestsContent() {
   const [requests, setRequests] = useState<Request[]>([]);
@@ -25,6 +34,9 @@ function RequestsContent() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const fetchRequests = async () => {
     try {
       setLoading(true);
@@ -41,9 +53,12 @@ function RequestsContent() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchRequests();
+
+    getAllStudents().then(setStudents);
+
+    getAllBooks().then(setBooks);
   }, []);
   if (loading) {
     return <LoadingState message="" />;
@@ -123,6 +138,18 @@ function RequestsContent() {
               "
             />
           </div>
+          <button
+            onClick={() => setShowAssignModal(true)}
+            className="
+    bg-[var(--primary)]
+    hover:bg-[var(--primary-hover)]
+    px-5 py-2
+    rounded-xl
+    font-semibold
+  "
+          >
+            + Assign Book
+          </button>
         </div>
 
         {/* TABLE */}
@@ -262,6 +289,14 @@ function RequestsContent() {
               </div>
             </div>
           </div>
+        )}
+        {showAssignModal && (
+          <AssignBookModal
+            students={students}
+            books={books}
+            onClose={() => setShowAssignModal(false)}
+            onSuccess={fetchRequests}
+          />
         )}
       </main>
     </div>
