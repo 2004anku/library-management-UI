@@ -1,10 +1,12 @@
 "use client";
-
+// React
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, BookOpen } from "lucide-react";
 
+// Features
 import { loginUser } from "@/domain/features/auth/services/auth.service";
+// Utils
 import { handleApiError } from "@/utils/errorHandler";
 
 export default function LoginPage() {

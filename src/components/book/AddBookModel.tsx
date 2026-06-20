@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createBook } from "@/domain/features/books/services/book.service";
 import { handleApiError } from "@/utils/errorHandler";
 import { toast } from "react-hot-toast";
+import { Button } from "../ui";
 
 type Props = {
   onClose: () => void;
@@ -129,13 +130,9 @@ export default function AddBookModal({ onClose, onSuccess }: Props) {
             Cancel
           </button>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="px-5 py-2 rounded-xl bg-[var(--primary)]"
-          >
-            {loading ? "Adding..." : "Add Book"}
-          </button>
+          <Button loading={loading} onClick={handleSubmit}>
+            Save Book
+          </Button>
         </div>
       </div>
     </div>

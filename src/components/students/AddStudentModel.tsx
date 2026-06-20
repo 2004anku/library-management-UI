@@ -4,6 +4,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { createStudent } from "@/domain/features/students/services/student.service";
 import { handleApiError } from "@/utils/errorHandler";
+import { Button } from "../ui";
 
 type Props = {
   onClose: () => void;
@@ -125,13 +126,9 @@ export default function AddStudentModal({ onClose, onSuccess }: Props) {
             Cancel
           </button>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="px-5 py-2 rounded-xl bg-[var(--primary)]"
-          >
-            {loading ? "Adding..." : "Add Student"}
-          </button>
+          <Button loading={loading} onClick={handleSubmit}>
+            Save Student
+          </Button>
         </div>
       </div>
     </div>

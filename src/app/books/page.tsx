@@ -1,21 +1,30 @@
 "use client";
+// React
 
-import ProtectedRoute from "@/components/auth/protectedRoutes";
-import Sidebar from "@/components/dashboard/Sidebar";
+import { useEffect, useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+
+// Features
 import {
   getAllBooks,
   deleteBook,
   updateBook,
 } from "@/domain/features/books/services/book.service";
-import { handleApiError } from "@/utils/errorHandler";
-import { useEffect, useState } from "react";
 import type { Book } from "@/domain/features/books/types/bookType";
+
+// Components
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
 import EditBookModal from "@/components/book/EditBookModel";
-import { Pencil, Trash2 } from "lucide-react";
 import AddBookModal from "@/components/book/AddBookModel";
+import ProtectedRoute from "@/components/auth/protectedRoutes";
+import Sidebar from "@/components/dashboard/Sidebar";
+import { Button } from "@/components/ui";
+import { SearchInput } from "@/components/ui";
+
+// Utils
+import { handleApiError } from "@/utils/errorHandler";
 
 function BooksContent() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -24,6 +33,7 @@ function BooksContent() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [search, setSearch] = useState("");
 
   const fetchBooks = async () => {
     try {
@@ -72,6 +82,11 @@ function BooksContent() {
 
     setShowEditModal(true);
   };
+  const filteredBooks = books.filter(
+    (book) =>
+      book.bookName.toLowerCase().includes(search.toLowerCase()) ||
+      book.author.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <div className="flex min-h-screen">
@@ -82,40 +97,13 @@ function BooksContent() {
           <h1 className="heading-font text-3xl font-bold">Books</h1>
 
           <div className="flex gap-3">
-            <input
-              type="text"
+            <SearchInput
+              value={search}
+              onChange={setSearch}
               placeholder="Search books..."
-              className="
-                w-full sm:w-64
-                pl-4 pr-4 py-2
-                bg-[var(--bg-card)]
-                border border-[var(--border)]
-                text-[var(--text-primary)]
-                placeholder-[var(--text-secondary)]
-                text-sm rounded-xl
-                focus:outline-none
-                focus:ring-2
-                focus:ring-[var(--primary)]
-                focus:border-[var(--primary)]
-                transition-all
-              "
             />
 
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="
-    flex items-center justify-center gap-2
-    bg-[var(--primary)]
-    hover:bg-[var(--primary-hover)]
-    text-[var(--text-primary)]
-    px-5 py-2
-    rounded-xl
-    text-sm
-    font-semibold
-  "
-            >
-              + Add Book
-            </button>
+            <Button onClick={() => setShowAddModal(true)}>+ Add Book</Button>
           </div>
         </div>
 
@@ -142,7 +130,7 @@ function BooksContent() {
             </thead>
 
             <tbody className="divide-y divide-[var(--border)]">
-              {books.map((book, index) => (
+              {filteredBooks.map((book, index) => (
                 <tr
                   key={book._id}
                   className="hover:bg-[var(--table-hover)] transition-colors duration-200"

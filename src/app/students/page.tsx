@@ -1,23 +1,34 @@
 "use client";
 
+// Next/React
+
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/dashboard/Sidebar";
+import { Pencil, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+
+// Services
 import {
   getAllStudents,
   deleteStudent,
   updateStudent,
 } from "@/domain/features/students/services/student.service";
 
+// Components
+
+import Sidebar from "@/components/dashboard/Sidebar";
+import AddStudentModal from "@/components/students/AddStudentModel";
 import EditStudentModal from "@/components/students/EditStudentModel";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
-import { handleApiError } from "@/utils/errorHandler";
-import type { Student } from "@/domain/features/students/types/studentType";
 import LoadingState from "@/components/ui/loadingState";
+import { Button } from "@/components/ui";
+import SearchInput from "@/components/ui/SearchInput";
+// UI
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
-import { Pencil, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
-import AddStudentModal from "@/components/students/AddStudentModel";
+import type { Student } from "@/domain/features/students/types/studentType";
+
+// Utils
+import { handleApiError } from "@/utils/errorHandler";
 
 function StudentsContent() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -26,6 +37,8 @@ function StudentsContent() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [search, setSearch] = useState("");
+
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -97,6 +110,13 @@ function StudentsContent() {
       toast.error(handleApiError(error));
     }
   };
+
+  const filteredStudents = students.filter(
+    (student) =>
+      student.studentName.toLowerCase().includes(search.toLowerCase()) ||
+      student.email.toLowerCase().includes(search.toLowerCase()) ||
+      student.course.toLowerCase().includes(search.toLowerCase()),
+  );
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -107,40 +127,12 @@ function StudentsContent() {
           <h1 className="heading-font text-3xl font-bold">Students</h1>
 
           <div className="flex gap-3">
-            <input
-              type="text"
+            <SearchInput
+              value={search}
+              onChange={setSearch}
               placeholder="Search students..."
-              className="
-                w-full sm:w-64
-                pl-4 pr-4 py-2
-                bg-[var(--bg-card)]
-                border border-[var(--border)]
-                text-[var(--text-primary)]
-                placeholder-[var(--text-secondary)]
-                text-sm rounded-xl
-                focus:outline-none
-                focus:ring-2
-                focus:ring-[var(--primary)]
-                focus:border-[var(--primary)]
-                transition-all
-              "
             />
-
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="
-    flex items-center justify-center gap-2
-    bg-[var(--primary)]
-    hover:bg-[var(--primary-hover)]
-    text-[var(--text-primary)]
-    px-5 py-2
-    rounded-xl
-    text-sm
-    font-semibold
-  "
-            >
-              + Add Student
-            </button>
+            <Button onClick={() => setShowAddModal(true)}>+ Add Student</Button>
           </div>
         </div>
 
@@ -179,7 +171,7 @@ function StudentsContent() {
             </thead>
 
             <tbody className="divide-y divide-[var(--border)]">
-              {students.map((student, index) => (
+              {filteredStudents.map((student, index) => (
                 <tr
                   key={student._id}
                   className="hover:bg-[var(--table-hover)] transition-colors duration-200"

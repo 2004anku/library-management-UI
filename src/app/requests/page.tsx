@@ -1,31 +1,38 @@
 "use client";
-
+// Next/React
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
+import { Check, X, Pencil } from "lucide-react";
+import toast from "react-hot-toast";
+
+// Services
 import {
   getAllRequests,
   approveRequest,
   rejectRequest,
   updateRequestStatus,
 } from "@/domain/features/requests/services/request.service";
-import ProtectedRoute from "@/components/auth/protectedRoutes";
-import { requestStatusConfig } from "@/config/requestStatus";
-import { handleApiError } from "@/utils/errorHandler";
-import type { Request } from "@/domain/features/requests/types/requestTypes";
+import { getAllStudents } from "@/domain/features/students/services/student.service";
+import { getAllBooks } from "@/domain/features/books/services/book.service";
+
+// Components
+
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
-import { Check, X, Pencil } from "lucide-react";
-import toast from "react-hot-toast";
+import ProtectedRoute from "@/components/auth/protectedRoutes";
 import AssignBookModal from "@/components/request/AssignBookModal";
+import { Button } from "@/components/ui";
 
-import { getAllStudents } from "@/domain/features/students/services/student.service";
+// Features
 
-import { getAllBooks } from "@/domain/features/books/services/book.service";
-
+import type { Request } from "@/domain/features/requests/types/requestTypes";
 import type { Student } from "@/domain/features/students/types/studentType";
-
 import type { Book } from "@/domain/features/books/types/bookType";
+import SearchInput from "@/components/ui/SearchInput";
+//Utils
+import { handleApiError } from "@/utils/errorHandler";
+import { requestStatusConfig } from "@/config/requestStatusTheme";
 
 function RequestsContent() {
   const [requests, setRequests] = useState<Request[]>([]);
@@ -37,6 +44,8 @@ function RequestsContent() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
+  const [search, setSearch] = useState("");
+
   const fetchRequests = async () => {
     try {
       setLoading(true);
@@ -109,6 +118,15 @@ function RequestsContent() {
       toast.error(handleApiError(error));
     }
   };
+  const filteredRequests = requests.filter(
+    (request) =>
+      request.studentId?.studentName
+        ?.toLowerCase()
+        .includes(search.toLowerCase()) ||
+      request.bookId?.bookName?.toLowerCase().includes(search.toLowerCase()) ||
+      request.status?.toLowerCase().includes(search.toLowerCase()),
+  );
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -118,38 +136,17 @@ function RequestsContent() {
         <div className="flex justify-between items-center mb-5">
           <h1 className="heading-font text-3xl font-bold">Requests</h1>
 
-          <div className="flex gap-3">
-            <input
-              type="text"
+          <div className="flex items-center gap-4">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
               placeholder="Search requests..."
-              className="
-                w-full sm:w-64
-                pl-4 pr-4 py-2
-                bg-[var(--bg-card)]
-                border border-[var(--border)]
-                text-[var(--text-primary)]
-                placeholder-[var(--text-secondary)]
-                text-sm rounded-xl
-                focus:outline-none
-                focus:ring-2
-                focus:ring-[var(--primary)]
-                focus:border-[var(--primary)]
-                transition-all
-              "
             />
+
+            <Button onClick={() => setShowAssignModal(true)}>
+              + Assign Book
+            </Button>
           </div>
-          <button
-            onClick={() => setShowAssignModal(true)}
-            className="
-    bg-[var(--primary)]
-    hover:bg-[var(--primary-hover)]
-    px-5 py-2
-    rounded-xl
-    font-semibold
-  "
-          >
-            + Assign Book
-          </button>
         </div>
 
         {/* TABLE */}
@@ -180,7 +177,7 @@ function RequestsContent() {
             </thead>
 
             <tbody className="divide-y divide-[var(--border)]">
-              {requests.map((request, index) => (
+              {filteredRequests.map((request, index) => (
                 <tr
                   key={request._id}
                   className="hover:bg-[var(--table-hover)] transition-colors duration-200"
