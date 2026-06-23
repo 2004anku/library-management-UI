@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { logoutUser } from "@/domain/features/auth/services/auth.service";
+import { logoutUser } from "@/features/auth/services/auth.service";
 import Link from "next/link";
 
 import {

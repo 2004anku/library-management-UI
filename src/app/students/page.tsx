@@ -2,7 +2,7 @@
 
 // Next/React
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -11,24 +11,39 @@ import {
   getAllStudents,
   deleteStudent,
   updateStudent,
-} from "@/domain/features/students/services/student.service";
+} from "@/features/students/services/student.service";
 
 // Components
 
 import Sidebar from "@/components/dashboard/Sidebar";
-import AddStudentModal from "@/components/students/AddStudentModel";
-import EditStudentModal from "@/components/students/EditStudentModel";
+import AddStudent from "@/app/students/AddStudent";
+import EditStudent from "@/app/students/EditStudent";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import LoadingState from "@/components/ui/loadingState";
-import { Button } from "@/components/ui";
-import SearchInput from "@/components/ui/SearchInput";
+import Button from "@/components/ui/button/Button";
+import DataTable from "@/components/ui/table/DataTable";
+import TableHeader from "@/components/ui/page/TableHeader";
+import TableColumns from "@/components/ui/table/TableColumns";
+import TableActions from "@/components/ui/table/TableActions";
+import { useRouter } from "next/navigation";
+import { searchStudents } from "@/features/dashboard/services/dashboard.service";
+
 // UI
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
-import type { Student } from "@/domain/features/students/types/studentType";
+import type { Student } from "@/features/students/types/studentType";
 
 // Utils
 import { handleApiError } from "@/utils/errorHandler";
+const columns = [
+  { key: "id", label: "ID", width: "10%" },
+  { key: "studentName", label: "Student Name", width: "20%" },
+  { key: "course", label: "Course", width: "15%" },
+  { key: "email", label: "Email", width: "25%" },
+  { key: "phone", label: "Phone", width: "15%" },
+  { key: "semester", label: "Semester", width: "10%" },
+  { key: "action", label: "Action", width: "15%", align: "right" as const },
+];
 
 function StudentsContent() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -38,7 +53,9 @@ function StudentsContent() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState("");
-
+  const router = useRouter();
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -55,6 +72,21 @@ function StudentsContent() {
   };
   useEffect(() => {
     fetchStudents();
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
   if (loading) {
     return <LoadingState message="" />;
@@ -63,8 +95,7 @@ function StudentsContent() {
   if (error) {
     return <ErrorState message={error} />;
   }
-
-  if (students.length === 0) {
+  if (students.length === 0 && !loading) {
     return <EmptyState message="No students found." />;
   }
   const handleDelete = async (studentId: string) => {
@@ -89,6 +120,24 @@ function StudentsContent() {
     setSelectedStudent(student);
 
     setShowEditModal(true);
+  };
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    setSearch(value);
+
+    if (value.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      const data = await searchStudents(value);
+
+      setSearchResults(data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleUpdate = async (
@@ -122,107 +171,136 @@ function StudentsContent() {
       <Sidebar />
 
       <main className="flex-1 p-8">
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-5">
-          <h1 className="heading-font text-3xl font-bold">Students</h1>
+        <TableHeader
+          title="Students"
+          action={
+            <div className="flex gap-3">
+              <div ref={searchRef} className="relative w-80">
+                <input
+                  type="text"
+                  placeholder="Search student..."
+                  value={search}
+                  onChange={handleSearch}
+                  className="
+      w-full
+      px-4 py-2
+      rounded-xl
+      bg-[var(--bg-card)]
+      border border-[var(--border)]
+    "
+                />
 
-          <div className="flex gap-3">
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder="Search students..."
-            />
-            <Button onClick={() => setShowAddModal(true)}>+ Add Student</Button>
-          </div>
-        </div>
+                {searchResults.length > 0 && (
+                  <div
+                    className="
+        absolute
+        top-full
+        mt-2
+        w-full
+        rounded-xl
+        border border-[var(--border)]
+        bg-[var(--bg-card)]
+        z-50
+      "
+                  >
+                    {searchResults.map((student) => (
+                      <button
+                        key={student._id}
+                        onClick={() => {
+                          router.push(`/students/${student._id}`);
+                        }}
+                        className="
+            w-full
+            text-left
+            p-3
+            hover:bg-[var(--table-hover)]
+          "
+                      >
+                        <div className="font-medium">{student.studentName}</div>
+
+                        <div className="text-xs text-gray-400">
+                          {student.email}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Button onClick={() => setShowAddModal(true)}>
+                + Add Student
+              </Button>
+            </div>
+          }
+        />
 
         {/* TABLE */}
-        <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
-          <table className="w-full table-fixed">
-            <thead className="border-b border-[var(--border)]">
-              <tr>
-                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  ID
-                </th>
+        <DataTable>
+          <TableColumns columns={columns} />
 
-                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Student Name
-                </th>
+          <tbody className="divide-y divide-[var(--border)]">
+            {filteredStudents.map((student, index) => (
+              <tr
+                key={student._id}
+                className="hover:bg-[var(--table-hover)] transition-colors duration-200"
+              >
+                <td className="p-4 text-sm font-mono text-[var(--text-secondary)]">
+                  {index + 1}
+                </td>
 
-                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Course
-                </th>
+                <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
+                  {student.studentName}
+                </td>
 
-                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Email
-                </th>
+                <td className="p-4 text-sm text-[var(--text-secondary)]">
+                  {student.course}
+                </td>
 
-                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Phone
-                </th>
+                <td className="p-4 text-sm text-[var(--text-secondary)]">
+                  {student.email}
+                </td>
 
-                <th className="p-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Semester
-                </th>
-                <th className="p-4 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Action
-                </th>
+                <td className="p-4 text-sm text-[var(--text-secondary)]">
+                  {student.phone}
+                </td>
+
+                <td className="p-4 text-sm text-[var(--text-secondary)]">
+                  {student.semester}
+                </td>
+                {filteredStudents.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="p-6 text-center text-[var(--text-secondary)]"
+                    >
+                      No students found
+                    </td>
+                  </tr>
+                )}
+
+                <td className="p-4 text-right">
+                  <TableActions>
+                    <button
+                      onClick={() => handleEdit(student)}
+                      className="p-2 rounded-lg hover:bg-[var(--success)]/20 transition-all duration-200"
+                    >
+                      <Pencil size={18} />
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(student._id)}
+                      className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </TableActions>
+                </td>
               </tr>
-            </thead>
-
-            <tbody className="divide-y divide-[var(--border)]">
-              {filteredStudents.map((student, index) => (
-                <tr
-                  key={student._id}
-                  className="hover:bg-[var(--table-hover)] transition-colors duration-200"
-                >
-                  <td className="p-4 text-sm font-mono text-[var(--text-secondary)]">
-                    {index + 1}
-                  </td>
-
-                  <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
-                    {student.studentName}
-                  </td>
-
-                  <td className="p-4 text-sm text-[var(--text-secondary)]">
-                    {student.course}
-                  </td>
-
-                  <td className="p-4 text-sm text-[var(--text-secondary)]">
-                    {student.email}
-                  </td>
-
-                  <td className="p-4 text-sm text-[var(--text-secondary)]">
-                    {student.phone}
-                  </td>
-
-                  <td className="p-4 text-sm text-[var(--text-secondary)]">
-                    {student.semester}
-                  </td>
-                  <td className="p-4">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => handleEdit(student)}
-                        className="p-2 rounded-lg hover:bg-[var(--success)]/20 transition-all duration-200"
-                      >
-                        <Pencil size={18} />
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(student._id)}
-                        className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </DataTable>
         {showEditModal && selectedStudent && (
-          <EditStudentModal
+          <EditStudent
             student={selectedStudent}
             onClose={() => {
               setShowEditModal(false);
@@ -232,7 +310,7 @@ function StudentsContent() {
           />
         )}
         {showAddModal && (
-          <AddStudentModal
+          <AddStudent
             onClose={() => setShowAddModal(false)}
             onSuccess={fetchStudents}
           />
@@ -241,7 +319,6 @@ function StudentsContent() {
     </div>
   );
 }
-
 export default function StudentsPage() {
   return (
     <ProtectedRoute>

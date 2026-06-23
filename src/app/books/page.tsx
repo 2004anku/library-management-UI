@@ -8,23 +8,49 @@ import { Pencil, Trash2 } from "lucide-react";
 import {
   getAllBooks,
   deleteBook,
-  updateBook,
-} from "@/domain/features/books/services/book.service";
-import type { Book } from "@/domain/features/books/types/bookType";
+} from "@/features/books/services/book.service";
+import type { Book } from "@/features/books/types/bookType";
 
 // Components
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
-import EditBookModal from "@/components/book/EditBookModel";
-import AddBookModal from "@/components/book/AddBookModel";
+import EditBook from "@/app/books/EditBook";
+import AddBook from "@/app/books/AddBook";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui";
 import { SearchInput } from "@/components/ui";
+import DataTable from "@/components/ui/table/DataTable";
+import TableHeader from "@/components/ui/page/TableHeader";
+import TableColumns from "@/components/ui/table/TableColumns";
+import TableActions from "@/components/ui/table/TableActions";
 
 // Utils
 import { handleApiError } from "@/utils/errorHandler";
+const columns = [
+  {
+    key: "id",
+    label: "ID",
+    width: "15%",
+  },
+  {
+    key: "title",
+    label: "Title",
+    width: "45%",
+  },
+  {
+    key: "author",
+    label: "Author",
+    width: "25%",
+  },
+  {
+    key: "action",
+    label: "Action",
+    width: "15%",
+    align: "right" as const,
+  },
+];
 
 function BooksContent() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -93,84 +119,65 @@ function BooksContent() {
       <Sidebar />
 
       <main className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-5">
-          <h1 className="heading-font text-3xl font-bold">Books</h1>
+        <TableHeader
+          title="Books"
+          action={
+            <div className="flex gap-3">
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Search books..."
+              />
 
-          <div className="flex gap-3">
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder="Search books..."
-            />
+              <Button onClick={() => setShowAddModal(true)}>+ Add Book</Button>
+            </div>
+          }
+        />
 
-            <Button onClick={() => setShowAddModal(true)}>+ Add Book</Button>
-          </div>
-        </div>
+        <DataTable>
+          <TableColumns columns={columns} />
 
-        <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
-          <table className="w-full table-fixed">
-            <thead className="border-b border-[var(--border)]">
-              <tr>
-                <th className="w-[15%] text-left p-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  ID
-                </th>
+          <tbody className="divide-y divide-[var(--border)]">
+            {filteredBooks.map((book, index) => (
+              <tr
+                key={book._id}
+                className="hover:bg-[var(--table-hover)] transition-colors duration-200"
+              >
+                <td className="p-4 text-sm font-medium text-[var(--text-secondary)]">
+                  {index + 1}
+                </td>
+                <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
+                  {book.bookName}
+                </td>
 
-                <th className="w-[45%] text-left p-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Title
-                </th>
+                <td className="p-4 text-sm text-[var(--text-secondary)]">
+                  {book.author}
+                </td>
 
-                <th className="w-[25%] text-left p-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Author
-                </th>
+                <td className="p-4">
+                  <TableActions>
+                    <button
+                      onClick={() => handleEdit(book)}
+                      className="p-2 rounded-lg hover:bg-[var(--success)]/20 transition-all duration-200"
+                    >
+                      <Pencil size={18} />
+                    </button>
 
-                <th className="w-[15%] text-right p-4 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Action
-                </th>
+                    <button
+                      onClick={() => handleDelete(book._id)}
+                      className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </TableActions>
+                </td>
               </tr>
-            </thead>
-
-            <tbody className="divide-y divide-[var(--border)]">
-              {filteredBooks.map((book, index) => (
-                <tr
-                  key={book._id}
-                  className="hover:bg-[var(--table-hover)] transition-colors duration-200"
-                >
-                  <td className="p-4 text-sm font-medium text-[var(--text-secondary)]">
-                    {index + 1}
-                  </td>
-                  <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
-                    {book.bookName}
-                  </td>
-
-                  <td className="p-4 text-sm text-[var(--text-secondary)]">
-                    {book.author}
-                  </td>
-
-                  <td className="p-4">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => handleEdit(book)}
-                        className="p-2 rounded-lg hover:bg-[var(--success)]/20 transition-all duration-200"
-                      >
-                        <Pencil size={18} />
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(book._id)}
-                        className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </DataTable>
       </main>
       {showEditModal && selectedBook && (
-        <EditBookModal
+        <EditBook
           book={selectedBook}
           onClose={() => {
             setShowEditModal(false);
@@ -180,7 +187,7 @@ function BooksContent() {
         />
       )}
       {showAddModal && (
-        <AddBookModal
+        <AddBook
           onClose={() => setShowAddModal(false)}
           onSuccess={fetchBooks}
         />
