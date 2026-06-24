@@ -29,3 +29,7 @@ export const assignBookApi = async (data: {
 }) => {
   return await api.post("/admin/book-circulation/assign-book", data);
 };
+
+export const deleteRequestApi = async (issueId: string) => {
+  return await api.delete(`/admin/book-circulation/delete-request/${issueId}`);
+};

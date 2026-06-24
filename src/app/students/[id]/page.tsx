@@ -7,7 +7,7 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 
-import { getStudentProfile } from "@/features/dashboard/services/dashboard.service";
+import { getStudentProfile } from "@/features/students/services/student.service";
 import { handleApiError } from "@/utils/errorHandler";
 
 type StudentProfileData = {

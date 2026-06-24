@@ -7,6 +7,8 @@ import {
   createStudentApi,
   getSingleStudentApi,
   getStudentProfileApi,
+  restoreStudentApi,
+  getArchivedStudentsApi,
 } from "../api/studentApi";
 
 export const getAllStudents = async () => {
@@ -53,4 +55,13 @@ export const getStudentProfile = async (studentId: string) => {
   const response = await getStudentProfileApi(studentId);
 
   return response.data.data;
+};
+export const getArchivedStudents = async () => {
+  const response = await getArchivedStudentsApi();
+  return response.data.data;
+};
+
+export const restoreStudent = async (studentId: string) => {
+  const response = await restoreStudentApi(studentId);
+  return response.data;
 };

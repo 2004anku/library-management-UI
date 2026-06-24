@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Features
 import {
@@ -25,7 +26,7 @@ import DataTable from "@/components/ui/table/DataTable";
 import TableHeader from "@/components/ui/page/TableHeader";
 import TableColumns from "@/components/ui/table/TableColumns";
 import TableActions from "@/components/ui/table/TableActions";
-
+import ArchiveBook from "./ArchiveBook";
 // Utils
 import { handleApiError } from "@/utils/errorHandler";
 const columns = [
@@ -60,7 +61,8 @@ function BooksContent() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState("");
-
+  const router = useRouter();
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
   const fetchBooks = async () => {
     try {
       setLoading(true);
@@ -130,6 +132,9 @@ function BooksContent() {
               />
 
               <Button onClick={() => setShowAddModal(true)}>+ Add Book</Button>
+              <Button onClick={() => setShowArchiveModal(true)}>
+                Archive Books
+              </Button>
             </div>
           }
         />
@@ -189,6 +194,12 @@ function BooksContent() {
       {showAddModal && (
         <AddBook
           onClose={() => setShowAddModal(false)}
+          onSuccess={fetchBooks}
+        />
+      )}
+      {showArchiveModal && (
+        <ArchiveBook
+          onClose={() => setShowArchiveModal(false)}
           onSuccess={fetchBooks}
         />
       )}

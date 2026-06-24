@@ -2,7 +2,7 @@
 // Next/React
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { Check, X, Pencil } from "lucide-react";
+import { Check, X, Pencil, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 // Services
@@ -11,6 +11,7 @@ import {
   approveRequest,
   rejectRequest,
   updateRequestStatus,
+  deleteRequest,
 } from "@/features/requests/services/request.service";
 import { getAllStudents } from "@/features/students/services/student.service";
 import { getAllBooks } from "@/features/books/services/book.service";
@@ -157,6 +158,21 @@ function RequestsContent() {
       request.bookId?.bookName?.toLowerCase().includes(search.toLowerCase()) ||
       request.status?.toLowerCase().includes(search.toLowerCase()),
   );
+  const handleDeleteRequest = async (issueId: string) => {
+    const confirmed = window.confirm("Delete this rejected request?");
+
+    if (!confirmed) return;
+
+    try {
+      await deleteRequest(issueId);
+
+      toast.success("Request deleted successfully");
+
+      await fetchRequests();
+    } catch (error) {
+      toast.error(handleApiError(error));
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -219,19 +235,23 @@ function RequestsContent() {
 
                 <td className="p-4">
                   <TableActions>
-                    <button
-                      onClick={() => handleApprove(request._id)}
-                      className="p-2 rounded-lg hover:bg-[var(--success)]/20 transition-all duration-200"
-                    >
-                      <Check size={18} />
-                    </button>
+                    {request.status === "pending" && (
+                      <>
+                        <button
+                          onClick={() => handleApprove(request._id)}
+                          className="p-2 rounded-lg hover:bg-[var(--success)]/20"
+                        >
+                          <Check size={18} />
+                        </button>
 
-                    <button
-                      onClick={() => handleReject(request._id)}
-                      className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
-                    >
-                      <X size={18} />
-                    </button>
+                        <button
+                          onClick={() => handleReject(request._id)}
+                          className="p-2 rounded-lg hover:bg-[var(--danger)]/20"
+                        >
+                          <X size={18} />
+                        </button>
+                      </>
+                    )}
 
                     <button
                       onClick={() => {
@@ -239,10 +259,19 @@ function RequestsContent() {
                         setSelectedStatus(request.status);
                         setShowEditModal(true);
                       }}
-                      className="p-2 rounded-lg hover:bg-blue-500/20 transition-all duration-200"
+                      className="p-2 rounded-lg hover:bg-blue-500/20"
                     >
                       <Pencil size={18} />
                     </button>
+
+                    {request.status === "rejected" && (
+                      <button
+                        onClick={() => handleDeleteRequest(request._id)}
+                        className="p-2 rounded-lg hover:bg-red-500/20"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
                   </TableActions>
                 </td>
               </tr>

@@ -11,6 +11,8 @@ import {
   getAllStudents,
   deleteStudent,
   updateStudent,
+  getArchivedStudents,
+  restoreStudent,
 } from "@/features/students/services/student.service";
 
 // Components
@@ -27,6 +29,7 @@ import TableColumns from "@/components/ui/table/TableColumns";
 import TableActions from "@/components/ui/table/TableActions";
 import { useRouter } from "next/navigation";
 import { searchStudents } from "@/features/dashboard/services/dashboard.service";
+import ArchiveStudent from "@/app/students/ArchiveStudent";
 
 // UI
 import ErrorState from "@/components/ui/errorState";
@@ -56,6 +59,8 @@ function StudentsContent() {
   const router = useRouter();
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -230,6 +235,9 @@ function StudentsContent() {
               <Button onClick={() => setShowAddModal(true)}>
                 + Add Student
               </Button>
+              <Button onClick={() => setShowArchiveModal(true)}>
+                Archived Students
+              </Button>
             </div>
           }
         />
@@ -312,6 +320,12 @@ function StudentsContent() {
         {showAddModal && (
           <AddStudent
             onClose={() => setShowAddModal(false)}
+            onSuccess={fetchStudents}
+          />
+        )}
+        {showArchiveModal && (
+          <ArchiveStudent
+            onClose={() => setShowArchiveModal(false)}
             onSuccess={fetchStudents}
           />
         )}

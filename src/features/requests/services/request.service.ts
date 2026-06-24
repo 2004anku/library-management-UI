@@ -4,6 +4,7 @@ import {
   rejectRequestApi,
   updateRequestStatusApi,
   assignBookApi,
+  deleteRequestApi,
 } from "../api/requestApi";
 
 export const getAllRequests = async () => {
@@ -36,6 +37,11 @@ export const assignBook = async (data: {
   dueDate?: string;
 }) => {
   const response = await assignBookApi(data);
+
+  return response.data;
+};
+export const deleteRequest = async (issueId: string) => {
+  const response = await deleteRequestApi(issueId);
 
   return response.data;
 };

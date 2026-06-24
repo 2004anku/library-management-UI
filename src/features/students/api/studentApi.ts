@@ -23,3 +23,10 @@ export const getSingleStudentApi = async (studentId: string) => {
 export const getStudentProfileApi = async (studentId: string) => {
   return await api.get(`/admin/student/profile/${studentId}`);
 };
+export const getArchivedStudentsApi = async () => {
+  return await api.get("/admin/student/archived-students");
+};
+
+export const restoreStudentApi = async (studentId: string) => {
+  return await api.patch(`/admin/student/restore-student/${studentId}`);
+};

@@ -8,4 +8,5 @@ export type Book = {
   isbn: string;
   price: number;
   libraryId?: string;
+  isDeleted?: boolean;
 };
