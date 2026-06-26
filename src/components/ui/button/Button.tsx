@@ -4,7 +4,7 @@ import { ButtonHTMLAttributes } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
-  variant?: "primary" | "danger" | "secondary";
+  variant?: "primary" | "danger" | "secondary" | "success";
 };
 
 export default function Button({
@@ -34,6 +34,11 @@ export default function Button({
       text-[var(--text-primary)]
       hover:bg-[var(--bg-card)]
     `,
+    success: `
+  bg-[var(--success)]
+  hover:opacity-90
+  text-white
+`,
   };
 
   return (

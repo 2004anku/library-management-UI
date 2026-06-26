@@ -12,6 +12,7 @@ import {
   rejectRequest,
   updateRequestStatus,
   deleteRequest,
+  acceptReturnRequest,
 } from "@/features/requests/services/request.service";
 import { getAllStudents } from "@/features/students/services/student.service";
 import { getAllBooks } from "@/features/books/services/book.service";
@@ -174,6 +175,18 @@ function RequestsContent() {
     }
   };
 
+  const handleAcceptReturn = async (issueId: string) => {
+    try {
+      await acceptReturnRequest(issueId);
+
+      toast.success("Book returned successfully");
+
+      await fetchRequests();
+    } catch (error) {
+      toast.error(handleApiError(error));
+    }
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -252,7 +265,15 @@ function RequestsContent() {
                         </button>
                       </>
                     )}
-
+                    {request.status === "return-pending" && (
+                      <button
+                        onClick={() => handleAcceptReturn(request._id)}
+                        className="p-2 rounded-lg hover:bg-[var(--success)]/20"
+                        title="Accept Return"
+                      >
+                        <Check size={18} />
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setSelectedRequest(request);
@@ -263,15 +284,6 @@ function RequestsContent() {
                     >
                       <Pencil size={18} />
                     </button>
-
-                    {request.status === "rejected" && (
-                      <button
-                        onClick={() => handleDeleteRequest(request._id)}
-                        className="p-2 rounded-lg hover:bg-red-500/20"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    )}
                   </TableActions>
                 </td>
               </tr>

@@ -33,3 +33,9 @@ export const assignBookApi = async (data: {
 export const deleteRequestApi = async (issueId: string) => {
   return await api.delete(`/admin/book-circulation/delete-request/${issueId}`);
 };
+
+export const acceptReturnRequestApi = async (issueId: string) => {
+  return await api.patch(
+    `/admin/book-circulation/accept-return-request/${issueId}`,
+  );
+};
