@@ -1,19 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { createBook } from "@/features/books/services/book.service";
-import { handleApiError } from "@/utils/errorHandler";
-import { toast } from "react-hot-toast";
 import Button from "@/components/ui/button/Button";
+import { useCreateBook } from "@/features/books/hooks/useCreateBook";
 
 type Props = {
   onClose: () => void;
-  onSuccess: () => void;
 };
 
-export default function AddBookModal({ onClose, onSuccess }: Props) {
-  const [loading, setLoading] = useState(false);
-
+export default function AddBookModal({ onClose }: Props) {
+  const createBookMutation = useCreateBook();
   const [formData, setFormData] = useState({
     bookName: "",
     author: "",
@@ -34,20 +30,9 @@ export default function AddBookModal({ onClose, onSuccess }: Props) {
   };
 
   const handleSubmit = async () => {
-    try {
-      setLoading(true);
+    await createBookMutation.mutateAsync(formData);
 
-      await createBook(formData as any);
-
-      toast.success("Book added successfully");
-
-      onSuccess();
-      onClose();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    } finally {
-      setLoading(false);
-    }
+    onClose();
   };
 
   return (
@@ -130,7 +115,7 @@ export default function AddBookModal({ onClose, onSuccess }: Props) {
             Cancel
           </button>
 
-          <Button loading={loading} onClick={handleSubmit}>
+          <Button loading={createBookMutation.isPending} onClick={handleSubmit}>
             Save Book
           </Button>
         </div>

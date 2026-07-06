@@ -1,16 +1,14 @@
-import type { Book } from "../types/bookType";
+import type { Book, CreateBookPayload } from "../types/bookType";
 
 import {
   getAllBooksApi,
   deleteBookApi,
   updateBookApi,
   createBookApi,
-} from "../api/bookApi";
-
-import {
   getArchivedBooksApi,
   restoreBookApi,
-} from "@/features/Restore/api/restoredApi";
+} from "../api/bookApi";
+
 export const getAllBooks = async () => {
   const response = await getAllBooksApi();
 
@@ -29,11 +27,12 @@ export const updateBook = async (bookId: string, bookData: Partial<Book>) => {
   return response.data.data;
 };
 
-export const createBook = async (bookData: Omit<Book, "_id">) => {
+export const createBook = async (bookData: CreateBookPayload) => {
   const response = await createBookApi(bookData);
 
   return response.data.data;
 };
+
 export const getDeletedBooks = async () => {
   const response = await getAllBooksApi();
 

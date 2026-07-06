@@ -10,3 +10,11 @@ export type Book = {
   libraryId?: string;
   isDeleted?: boolean;
 };
+export interface CreateBookPayload {
+  bookName: string;
+  author: string;
+  category: string;
+  isbn: string;
+  totalCopies: number;
+  price: number;
+}

@@ -1,18 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import toast from "react-hot-toast";
-import { createStudent } from "@/features/students/services/student.service";
-import { handleApiError } from "@/utils/errorHandler";
 import Button from "@/components/ui/button/Button";
+import { useCreateStudent } from "@/features/students/hooks/useCreateStudent";
 
 type Props = {
   onClose: () => void;
-  onSuccess: () => void;
 };
 
-export default function AddStudentModal({ onClose, onSuccess }: Props) {
-  const [loading, setLoading] = useState(false);
+export default function AddStudentModal({ onClose }: Props) {
+  const createStudentMutation = useCreateStudent();
 
   const [formData, setFormData] = useState({
     studentName: "",
@@ -33,20 +30,9 @@ export default function AddStudentModal({ onClose, onSuccess }: Props) {
   };
 
   const handleSubmit = async () => {
-    try {
-      setLoading(true);
+    await createStudentMutation.mutateAsync(formData);
 
-      await createStudent(formData);
-
-      toast.success("Student added successfully");
-
-      onSuccess();
-      onClose();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    } finally {
-      setLoading(false);
-    }
+    onClose();
   };
 
   return (
@@ -78,6 +64,7 @@ export default function AddStudentModal({ onClose, onSuccess }: Props) {
           <div>
             <label className="text-sm">Password</label>
             <input
+              type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
@@ -126,7 +113,10 @@ export default function AddStudentModal({ onClose, onSuccess }: Props) {
             Cancel
           </button>
 
-          <Button loading={loading} onClick={handleSubmit}>
+          <Button
+            loading={createStudentMutation.isPending}
+            onClick={handleSubmit}
+          >
             Save Student
           </Button>
         </div>

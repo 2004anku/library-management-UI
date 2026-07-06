@@ -1,22 +1,18 @@
 "use client";
 // Next/React
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Check, X, Pencil, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
 
 // Services
-import {
-  getAllRequests,
-  approveRequest,
-  rejectRequest,
-  updateRequestStatus,
-  deleteRequest,
-  acceptReturnRequest,
-} from "@/features/requests/services/request.service";
-import { getAllStudents } from "@/features/students/services/student.service";
-import { getAllBooks } from "@/features/books/services/book.service";
-
+import { useRequests } from "@/features/requests/hooks/useRequests";
+import { useApproveRequest } from "@/features/requests/hooks/useApproveRequest";
+import { useRejectRequest } from "@/features/requests/hooks/useRejectRequest";
+import { useUpdateRequestStatus } from "@/features/requests/hooks/useUpdateRequestStatus";
+import { useDeleteRequest } from "@/features/requests/hooks/useDeleteRequest";
+import { useAcceptReturnRequest } from "@/features/requests/hooks/useAcceptReturnRequest";
+import { useStudents } from "@/features/students/hooks/useStudents";
+import { useBooks } from "@/features/books/hooks/useBooks";
 // Components
 
 import LoadingState from "@/components/ui/loadingState";
@@ -33,24 +29,25 @@ import TableActions from "@/components/ui/table/TableActions";
 // Features
 
 import type { Request } from "@/features/requests/types/requestTypes";
-import type { Student } from "@/features/students/types/studentType";
-import type { Book } from "@/features/books/types/bookType";
+
 import SearchInput from "@/components/ui/input/SearchInput";
 //Utils
-import { handleApiError } from "@/utils/errorHandler";
 import { requestStatusConfig } from "@/app/requests/requestStatusTheme";
 
 function RequestsContent() {
-  const [requests, setRequests] = useState<Request[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { data: requests = [], isLoading: loading, error } = useRequests();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [books, setBooks] = useState<Book[]>([]);
+  const { data: students = [] } = useStudents();
+  const { data: books = [] } = useBooks();
   const [search, setSearch] = useState("");
+  const approveRequestMutation = useApproveRequest();
+  const rejectRequestMutation = useRejectRequest();
+  const updateRequestStatusMutation = useUpdateRequestStatus();
+  const deleteRequestMutation = useDeleteRequest();
+  const acceptReturnRequestMutation = useAcceptReturnRequest();
   const columns = [
     {
       key: "id",
@@ -79,114 +76,63 @@ function RequestsContent() {
       align: "right" as const,
     },
   ];
-  const fetchRequests = async () => {
-    try {
-      setLoading(true);
-      setError("");
 
-      const data = await getAllRequests();
-
-      setRequests(data);
-    } catch (error) {
-      console.error("Error fetching requests:", error);
-
-      setError(handleApiError(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchRequests();
-
-    getAllStudents().then(setStudents);
-
-    getAllBooks().then(setBooks);
-  }, []);
   if (loading) {
     return <LoadingState message="" />;
   }
 
   if (error) {
-    return <ErrorState message={error} />;
+    return (
+      <ErrorState
+        message={
+          error instanceof Error ? error.message : "Failed to load requests."
+        }
+      />
+    );
   }
 
   if (requests.length === 0) {
     return <EmptyState message="No requests found." />;
   }
-  const handleApprove = async (issueId: string) => {
-    try {
-      await approveRequest(issueId);
-
-      toast.success("Request approved successfully");
-
-      await fetchRequests();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
+  const handleApprove = (issueId: string) => {
+    approveRequestMutation.mutate(issueId);
   };
-  const handleReject = async (issueId: string) => {
-    try {
-      await rejectRequest(issueId);
-
-      toast.success("Request reject successfully");
-
-      await fetchRequests();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
+  const handleReject = (issueId: string) => {
+    rejectRequestMutation.mutate(issueId);
   };
-  const handleUpdateStatus = async () => {
+  const handleUpdateStatus = () => {
     if (!selectedRequest) return;
 
-    try {
-      await updateRequestStatus(selectedRequest._id, selectedStatus);
-
-      setShowEditModal(false);
-      setSelectedRequest(null);
-
-      toast.success("Request updated successfully");
-
-      await fetchRequests();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
+    updateRequestStatusMutation.mutate(
+      {
+        issueId: selectedRequest._id,
+        status: selectedStatus,
+      },
+      {
+        onSuccess: () => {
+          setShowEditModal(false);
+          setSelectedRequest(null);
+        },
+      },
+    );
   };
   const filteredRequests = requests.filter(
-    (request) =>
+    (request: Request) =>
       request.studentId?.studentName
         ?.toLowerCase()
         .includes(search.toLowerCase()) ||
       request.bookId?.bookName?.toLowerCase().includes(search.toLowerCase()) ||
       request.status?.toLowerCase().includes(search.toLowerCase()),
   );
-  const handleDeleteRequest = async (issueId: string) => {
-    const confirmed = window.confirm("Delete this rejected request?");
+  const handleDeleteRequest = (issueId: string) => {
+    if (!window.confirm("Delete this rejected request?")) return;
 
-    if (!confirmed) return;
-
-    try {
-      await deleteRequest(issueId);
-
-      toast.success("Request deleted successfully");
-
-      await fetchRequests();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
+    deleteRequestMutation.mutate(issueId);
   };
 
-  const handleAcceptReturn = async (issueId: string) => {
-    try {
-      await acceptReturnRequest(issueId);
-
-      toast.success("Book returned successfully");
-
-      await fetchRequests();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
+  const handleAcceptReturn = (issueId: string) => {
+    acceptReturnRequestMutation.mutate(issueId);
   };
-
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -213,7 +159,7 @@ function RequestsContent() {
           <TableColumns columns={columns} />
 
           <tbody className="divide-y divide-[var(--border)]">
-            {filteredRequests.map((request, index) => (
+            {filteredRequests.map((request: Request, index: number) => (
               <tr
                 key={request._id}
                 className="hover:bg-[var(--table-hover)] transition-colors duration-200"
@@ -339,7 +285,6 @@ function RequestsContent() {
             students={students}
             books={books}
             onClose={() => setShowAssignModal(false)}
-            onSuccess={fetchRequests}
           />
         )}
       </main>

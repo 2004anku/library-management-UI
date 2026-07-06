@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import type { Student } from "@/domain/features/students/types/studentType";
+import type { Student } from "@/features/students/types/studentType";
+import { useUpdateStudent } from "@/features/students/hooks/useUpdateStudent";
+import Button from "@/components/ui/button/Button";
 
 type Props = {
   student: Student;
   onClose: () => void;
-  onSave: (data: Partial<Student> & { password?: string }) => Promise<void>;
 };
 
-export default function EditStudentModal({ student, onClose, onSave }: Props) {
+export default function EditStudentModal({ student, onClose }: Props) {
+  const updateStudentMutation = useUpdateStudent();
+
   const [formData, setFormData] = useState({
     studentName: student.studentName,
     email: student.email,
@@ -20,8 +23,6 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
     status: student.status,
     password: "",
   });
-
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -34,36 +35,35 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
     }));
   };
 
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
+  const handleUpdate = async () => {
+    const payload: Partial<Student> & { password?: string } = {
+      studentName: formData.studentName,
+      email: formData.email,
+      phone: formData.phone,
+      course: formData.course,
+      semester: formData.semester,
+      fine: formData.fine,
+      status: formData.status as "active" | "inactive",
+    };
 
-      const payload: Partial<Student> & { password?: string } = {
-        studentName: formData.studentName,
-        email: formData.email,
-        phone: formData.phone,
-        course: formData.course,
-        semester: formData.semester,
-        fine: formData.fine,
-        status: formData.status as "active" | "inactive",
-      };
-
-      if (formData.password.trim()) {
-        payload.password = formData.password;
-      }
-
-      await onSave(payload);
-    } finally {
-      setLoading(false);
+    if (formData.password.trim()) {
+      payload.password = formData.password;
     }
+
+    await updateStudentMutation.mutateAsync({
+      studentId: student._id,
+      data: payload,
+    });
+
+    onClose();
   };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="w-full max-w-2xl rounded-2xl bg-[var(--bg-sidebar)] border border-[var(--border)] p-6">
         <h2 className="heading-font text-2xl font-bold mb-6">Edit Student</h2>
 
         <div className="grid grid-cols-2 gap-4">
-          {/* Student Name */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
               Student Name
@@ -77,7 +77,6 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
             />
           </div>
 
-          {/* Email */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
               Email Address
@@ -91,7 +90,6 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
             />
           </div>
 
-          {/* Phone */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
               Phone Number
@@ -105,7 +103,6 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
             />
           </div>
 
-          {/* Course */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
               Course
@@ -119,7 +116,6 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
             />
           </div>
 
-          {/* Semester */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
               Semester
@@ -134,7 +130,6 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
             />
           </div>
 
-          {/* Fine */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
               Fine Amount
@@ -149,7 +144,6 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
             />
           </div>
 
-          {/* Status */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
               Status
@@ -166,7 +160,6 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
             </select>
           </div>
 
-          {/* Password */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
               New Password (Optional)
@@ -191,13 +184,12 @@ export default function EditStudentModal({ student, onClose, onSave }: Props) {
             Cancel
           </button>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="px-5 py-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-50"
+          <Button
+            loading={updateStudentMutation.isPending}
+            onClick={handleUpdate}
           >
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
+            Update
+          </Button>
         </div>
       </div>
     </div>

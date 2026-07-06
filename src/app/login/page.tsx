@@ -5,39 +5,39 @@ import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, BookOpen } from "lucide-react";
 
 // Features
-import { loginUser } from "@/features/auth/services/auth.service";
+import { useLogin } from "@/features/auth/hooks/useLogin";
 // Utils
 import { handleApiError } from "@/utils/errorHandler";
 
 export default function LoginPage() {
   const router = useRouter();
-
+  const loginMutation = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      setLoading(true);
-      setError("");
+    setError("");
 
-      await loginUser({
+    loginMutation.mutate(
+      {
         email,
         password,
-      });
+      },
+      {
+        onSuccess: () => {
+          router.push("/");
+        },
 
-      router.push("/");
-    } catch (err) {
-      setError(handleApiError(err));
-    } finally {
-      setLoading(false);
-    }
+        onError: (err) => {
+          setError(handleApiError(err));
+        },
+      },
+    );
   };
 
   return (
@@ -305,7 +305,7 @@ export default function LoginPage() {
           {/* Button */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loginMutation.isPending}
             className="
               w-full
               mt-2
@@ -320,7 +320,7 @@ export default function LoginPage() {
               active:scale-[0.98]
             "
           >
-            {loading ? "Logging in..." : "Log In"}
+            {loginMutation.isPending ? "Logging in..." : "Log In"}
           </button>
         </form>
 

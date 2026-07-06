@@ -1,59 +1,25 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useDashboardStats } from "@/features/dashboard/hooks/useDashboardStats";
 import Sidebar from "@/components/dashboard/Sidebar";
 import StatsCard from "@/components/dashboard/StatsCard";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
-import { getDashboardStats } from "@/features/dashboard/services/dashboard.service";
-import { handleApiError } from "@/utils/errorHandler";
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 
-type Stats = {
-  totalStudents: number;
-  totalBooks: number;
-  booksIssued: number;
-  pendingRequests: number;
-  returnRequests: number;
-  totalFinePending: number;
-};
-
 function DashboardContent() {
-  const [stats, setStats] = useState<Stats>({
-    totalStudents: 0,
-    totalBooks: 0,
-    booksIssued: 0,
-    pendingRequests: 0,
-    returnRequests: 0,
-    totalFinePending: 0,
-  });
-  const [loading, setLoading] = useState(true);
-
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-
-        const data = await getDashboardStats();
-
-        setStats(data);
-      } catch (error) {
-        console.error(error);
-        setError(handleApiError(error));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
+  const { data: stats, isLoading: loading, error } = useDashboardStats();
   if (loading) {
     return <LoadingState message="" />;
   }
   if (error) {
-    return <ErrorState message={error} />;
+    return (
+      <ErrorState
+        message={
+          error instanceof Error ? error.message : "Failed to load dashboard."
+        }
+      />
+    );
   }
   return (
     <div className="flex min-h-screen">
@@ -68,17 +34,26 @@ function DashboardContent() {
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          <StatsCard title="Total Students" count={stats.totalStudents} />
+          <StatsCard title="Total Students" count={stats?.totalStudents ?? 0} />
 
-          <StatsCard title="Total Books" count={stats.totalBooks} />
+          <StatsCard title="Total Books" count={stats?.totalBooks ?? 0} />
 
-          <StatsCard title="Books Issued" count={stats.booksIssued} />
+          <StatsCard title="Books Issued" count={stats?.booksIssued ?? 0} />
 
-          <StatsCard title="Pending Requests" count={stats.pendingRequests} />
+          <StatsCard
+            title="Pending Requests"
+            count={stats?.pendingRequests ?? 0}
+          />
 
-          <StatsCard title="Return Requests" count={stats.returnRequests} />
+          <StatsCard
+            title="Return Requests"
+            count={stats?.returnRequests ?? 0}
+          />
 
-          <StatsCard title="Fine Pending" count={stats.totalFinePending} />
+          <StatsCard
+            title="Fine Pending"
+            count={stats?.totalFinePending ?? 0}
+          />
         </div>
       </main>
     </div>

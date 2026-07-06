@@ -1,15 +1,11 @@
 "use client";
 // React
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-
+import { useBooks } from "@/features/books/hooks/useBooks";
 // Features
-import {
-  getAllBooks,
-  deleteBook,
-} from "@/features/books/services/book.service";
+import { useDeleteBook } from "@/features/books/hooks/useDeleteBook";
 import type { Book } from "@/features/books/types/bookType";
 
 // Components
@@ -54,64 +50,40 @@ const columns = [
 ];
 
 function BooksContent() {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { data: books = [], isLoading: loading, error, refetch } = useBooks();
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState("");
-  const router = useRouter();
   const [showArchiveModal, setShowArchiveModal] = useState(false);
-  const fetchBooks = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const data = await getAllBooks();
-
-      setBooks(data);
-    } catch (error) {
-      setError(handleApiError(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchBooks();
-  }, []);
+  const deleteBookMutation = useDeleteBook();
   if (loading) {
     return <LoadingState message="" />;
   }
 
   if (error) {
-    return <ErrorState message={error} />;
+    return <ErrorState message={handleApiError(error)} />;
   }
 
   if (books.length === 0) {
     return <EmptyState message="No books found." />;
   }
-  const handleDelete = async (bookId: string) => {
+  const handleDelete = (bookId: string) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this book?",
     );
 
     if (!confirmed) return;
 
-    try {
-      await deleteBook(bookId);
-
-      await fetchBooks();
-    } catch (error) {}
+    deleteBookMutation.mutate(bookId);
   };
-
   const handleEdit = (book: Book) => {
     setSelectedBook(book);
 
     setShowEditModal(true);
   };
   const filteredBooks = books.filter(
-    (book) =>
+    (book: Book) =>
       book.bookName.toLowerCase().includes(search.toLowerCase()) ||
       book.author.toLowerCase().includes(search.toLowerCase()),
   );
@@ -143,7 +115,7 @@ function BooksContent() {
           <TableColumns columns={columns} />
 
           <tbody className="divide-y divide-[var(--border)]">
-            {filteredBooks.map((book, index) => (
+            {filteredBooks.map((book: Book, index: number) => (
               <tr
                 key={book._id}
                 className="hover:bg-[var(--table-hover)] transition-colors duration-200"
@@ -188,20 +160,11 @@ function BooksContent() {
             setShowEditModal(false);
             setSelectedBook(null);
           }}
-          onSuccess={fetchBooks}
         />
       )}
-      {showAddModal && (
-        <AddBook
-          onClose={() => setShowAddModal(false)}
-          onSuccess={fetchBooks}
-        />
-      )}
+      {showAddModal && <AddBook onClose={() => setShowAddModal(false)} />}
       {showArchiveModal && (
-        <ArchiveBook
-          onClose={() => setShowArchiveModal(false)}
-          onSuccess={fetchBooks}
-        />
+        <ArchiveBook onClose={() => setShowArchiveModal(false)} />
       )}
     </div>
   );

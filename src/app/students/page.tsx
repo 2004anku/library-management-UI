@@ -1,20 +1,10 @@
 "use client";
 
 // Next/React
-
-import { useEffect, useState, useRef } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
-
-// Services
-import {
-  getAllStudents,
-  deleteStudent,
-  updateStudent,
-  getArchivedStudents,
-  restoreStudent,
-} from "@/features/students/services/student.service";
-
+import { useState, useRef, useEffect } from "react";
+import { useStudents } from "@/features/students/hooks/useStudents";
+import { useDeleteStudent } from "@/features/students/hooks/useDeleteStudent";
 // Components
 
 import Sidebar from "@/components/dashboard/Sidebar";
@@ -36,8 +26,6 @@ import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
 import type { Student } from "@/features/students/types/studentType";
 
-// Utils
-import { handleApiError } from "@/utils/errorHandler";
 const columns = [
   { key: "id", label: "ID", width: "10%" },
   { key: "studentName", label: "Student Name", width: "20%" },
@@ -49,9 +37,9 @@ const columns = [
 ];
 
 function StudentsContent() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { data: students = [], isLoading: loading, error } = useStudents();
+
+  const deleteStudentMutation = useDeleteStudent();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -60,24 +48,13 @@ function StudentsContent() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
-
-  const fetchStudents = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const data = await getAllStudents();
-
-      setStudents(data);
-    } catch (error) {
-      setError(handleApiError(error));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredStudents = students.filter(
+    (student: Student) =>
+      student.studentName.toLowerCase().includes(search.toLowerCase()) ||
+      student.email.toLowerCase().includes(search.toLowerCase()) ||
+      student.course.toLowerCase().includes(search.toLowerCase()),
+  );
   useEffect(() => {
-    fetchStudents();
-
     const handleClickOutside = (event: MouseEvent) => {
       if (
         searchRef.current &&
@@ -93,33 +70,9 @@ function StudentsContent() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  if (loading) {
-    return <LoadingState message="" />;
-  }
-
-  if (error) {
-    return <ErrorState message={error} />;
-  }
-  if (students.length === 0 && !loading) {
-    return <EmptyState message="No students found." />;
-  }
-  const handleDelete = async (studentId: string) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this student?",
-    );
-
-    if (!confirmed) return;
-
-    try {
-      await deleteStudent(studentId);
-
-      toast.success("Student deleted successfully");
-
-      await fetchStudents();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
-  };
+  if (loading) return <LoadingState message="" />;
+  if (error) return <ErrorState message="Failed to load students." />;
+  if (!students.length) return <EmptyState message="No students found." />;
 
   const handleEdit = (student: Student) => {
     setSelectedStudent(student);
@@ -144,33 +97,6 @@ function StudentsContent() {
       console.error(error);
     }
   };
-
-  const handleUpdate = async (
-    data: Partial<Student> & { password?: string },
-  ) => {
-    if (!selectedStudent) return;
-
-    try {
-      await updateStudent(selectedStudent._id, data);
-
-      toast.success("Student updated successfully");
-
-      setShowEditModal(false);
-
-      setSelectedStudent(null);
-
-      await fetchStudents();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
-  };
-
-  const filteredStudents = students.filter(
-    (student) =>
-      student.studentName.toLowerCase().includes(search.toLowerCase()) ||
-      student.email.toLowerCase().includes(search.toLowerCase()) ||
-      student.course.toLowerCase().includes(search.toLowerCase()),
-  );
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -187,14 +113,13 @@ function StudentsContent() {
                   value={search}
                   onChange={handleSearch}
                   className="
-      w-full
-      px-4 py-2
-      rounded-xl
-      bg-[var(--bg-card)]
-      border border-[var(--border)]
-    "
+          w-full
+          px-4 py-2
+          rounded-xl
+          bg-[var(--bg-card)]
+          border border-[var(--border)]
+        "
                 />
-
                 {searchResults.length > 0 && (
                   <div
                     className="
@@ -208,12 +133,10 @@ function StudentsContent() {
         z-50
       "
                   >
-                    {searchResults.map((student) => (
+                    {searchResults.map((student: Student) => (
                       <button
                         key={student._id}
-                        onClick={() => {
-                          router.push(`/students/${student._id}`);
-                        }}
+                        onClick={() => router.push(`/students/${student._id}`)}
                         className="
             w-full
             text-left
@@ -231,7 +154,6 @@ function StudentsContent() {
                   </div>
                 )}
               </div>
-
               <Button onClick={() => setShowAddModal(true)}>
                 + Add Student
               </Button>
@@ -241,13 +163,12 @@ function StudentsContent() {
             </div>
           }
         />
-
         {/* TABLE */}
         <DataTable>
           <TableColumns columns={columns} />
 
           <tbody className="divide-y divide-[var(--border)]">
-            {filteredStudents.map((student, index) => (
+            {filteredStudents.map((student: Student, index: number) => (
               <tr
                 key={student._id}
                 className="hover:bg-[var(--table-hover)] transition-colors duration-200"
@@ -275,16 +196,6 @@ function StudentsContent() {
                 <td className="p-4 text-sm text-[var(--text-secondary)]">
                   {student.semester}
                 </td>
-                {filteredStudents.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="p-6 text-center text-[var(--text-secondary)]"
-                    >
-                      No students found
-                    </td>
-                  </tr>
-                )}
 
                 <td className="p-4 text-right">
                   <TableActions>
@@ -296,8 +207,11 @@ function StudentsContent() {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(student._id)}
-                      className="p-2 rounded-lg hover:bg-[var(--danger)]/20 transition-all duration-200"
+                      onClick={() => {
+                        if (window.confirm("Delete this student?")) {
+                          deleteStudentMutation.mutate(student._id);
+                        }
+                      }}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -314,20 +228,11 @@ function StudentsContent() {
               setShowEditModal(false);
               setSelectedStudent(null);
             }}
-            onSave={handleUpdate}
           />
         )}
-        {showAddModal && (
-          <AddStudent
-            onClose={() => setShowAddModal(false)}
-            onSuccess={fetchStudents}
-          />
-        )}
+        {showAddModal && <AddStudent onClose={() => setShowAddModal(false)} />}{" "}
         {showArchiveModal && (
-          <ArchiveStudent
-            onClose={() => setShowArchiveModal(false)}
-            onSuccess={fetchStudents}
-          />
+          <ArchiveStudent onClose={() => setShowArchiveModal(false)} />
         )}
       </main>
     </div>

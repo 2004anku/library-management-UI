@@ -2,24 +2,16 @@
 
 import { useState } from "react";
 import type { Book } from "@/features/books/types/bookType";
-import { updateBook } from "@/features/books/services/book.service";
-import { handleApiError } from "@/utils/errorHandler";
-import toast from "react-hot-toast";
-
+import { useUpdateBook } from "@/features/books/hooks/useUpdateBook";
+import Button from "@/components/ui/button/Button";
 type EditBookModalProps = {
   book: Book;
   onClose: () => void;
-  onSuccess: () => void;
 };
 
-export default function EditBookModal({
-  book,
-  onClose,
-  onSuccess,
-}: EditBookModalProps) {
+export default function EditBookModal({ book, onClose }: EditBookModalProps) {
   const [formData, setFormData] = useState<Book>(book);
-  const [loading, setLoading] = useState(false);
-
+  const updateBookMutation = useUpdateBook();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -33,27 +25,22 @@ export default function EditBookModal({
   };
 
   const handleUpdate = async () => {
+    if (updateBookMutation.isPending) return;
     try {
-      setLoading(true);
-
-      await updateBook(book._id, {
-        bookName: formData.bookName,
-        author: formData.author,
-        category: formData.category,
-        isbn: formData.isbn,
-        totalCopies: formData.totalCopies,
-        availableCopies: formData.availableCopies,
-        price: formData.price,
+      await updateBookMutation.mutateAsync({
+        bookId: book._id,
+        bookData: {
+          bookName: formData.bookName,
+          author: formData.author,
+          category: formData.category,
+          isbn: formData.isbn,
+          totalCopies: formData.totalCopies,
+          availableCopies: formData.availableCopies,
+          price: formData.price,
+        },
       });
-
-      toast.success("Book updated successfully");
-
-      onSuccess();
+    } catch {
       onClose();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    } finally {
-      setLoading(false);
     }
   };
   return (
@@ -171,13 +158,9 @@ export default function EditBookModal({
             Cancel
           </button>
 
-          <button
-            onClick={handleUpdate}
-            disabled={loading}
-            className="px-5 py-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-50"
-          >
-            {loading ? "Updating..." : "Update"}
-          </button>
+          <Button loading={updateBookMutation.isPending} onClick={handleUpdate}>
+            Update
+          </Button>
         </div>
       </div>
     </div>

@@ -1,55 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { X, RotateCcw } from "lucide-react";
-import toast from "react-hot-toast";
-
 import type { Book } from "@/features/books/types/bookType";
-import { handleApiError } from "@/utils/errorHandler";
-import {
-  getArchivedBooksApi,
-  restoreBookApi,
-} from "@/features/Restore/api/restoredApi";
+import { useArchivedBooks } from "@/features/books/hooks/useArchivedBooks";
+import { useRestoreBook } from "@/features/books/hooks/useRestoreBook";
 type Props = {
   onClose: () => void;
-  onSuccess: () => void;
 };
 
-export default function ArchiveBook({ onClose, onSuccess }: Props) {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(false);
+export default function ArchiveBook({ onClose }: Props) {
+  const { data: books = [], isLoading: loading } = useArchivedBooks();
 
-  // FETCH ARCHIVED BOOKS
-  const fetchArchivedBooks = async () => {
-    try {
-      setLoading(true);
-
-      const data = await getArchivedBooksApi();
-
-      setBooks(data);
-    } catch (error) {
-      toast.error(handleApiError(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchArchivedBooks();
-  }, []);
+  const restoreBookMutation = useRestoreBook();
 
   // RESTORE BOOK
   const handleRestore = async (bookId: string) => {
-    try {
-      await restoreBookApi(bookId);
-
-      toast.success("Book restored successfully");
-
-      fetchArchivedBooks();
-      onSuccess();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
+    if (restoreBookMutation.isPending) return;
+    await restoreBookMutation.mutateAsync(bookId);
   };
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -70,7 +37,7 @@ export default function ArchiveBook({ onClose, onSuccess }: Props) {
           <p className="text-gray-400">No archived books found</p>
         ) : (
           <div className="space-y-3 max-h-[400px] overflow-auto">
-            {books.map((book) => (
+            {books.map((book: Book) => (
               <div
                 key={book._id}
                 className="flex justify-between items-center p-3 border border-[var(--border)] rounded-xl"
@@ -81,8 +48,9 @@ export default function ArchiveBook({ onClose, onSuccess }: Props) {
                 </div>
 
                 <button
+                  disabled={restoreBookMutation.isPending}
                   onClick={() => handleRestore(book._id)}
-                  className="flex items-center gap-2 px-3 py-1 rounded-lg bg-green-500/20 hover:bg-green-500/30"
+                  className="flex items-center gap-2 px-3 py-1 rounded-lg bg-green-500/20 hover:bg-green-500/30 disabled:opacity-50"
                 >
                   <RotateCcw size={16} />
                   Restore

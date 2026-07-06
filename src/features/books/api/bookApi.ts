@@ -1,5 +1,5 @@
 import api from "@/lib/axios/axios";
-import type { Book } from "../types/bookType";
+import type { Book, CreateBookPayload } from "../types/bookType";
 
 export const getAllBooksApi = async () => {
   return await api.get("/admin/books/all-books");
@@ -16,6 +16,16 @@ export const updateBookApi = async (
   return await api.patch(`/admin/books/update-book/${bookId}`, bookData);
 };
 
-export const createBookApi = async (bookData: Omit<Book, "_id">) => {
+export const createBookApi = async (bookData: CreateBookPayload) => {
   return await api.post("/admin/books/create-book", bookData);
+};
+export const getArchivedBooksApi = async () => {
+  const response = await api.get("/admin/books/archived-books");
+  return response.data.data;
+};
+
+export const restoreBookApi = async (bookId: string) => {
+  const response = await api.patch(`/admin/books/restore-book/${bookId}`);
+
+  return response.data;
 };

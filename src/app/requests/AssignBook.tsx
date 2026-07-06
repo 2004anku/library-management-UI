@@ -1,61 +1,53 @@
 "use client";
 
 import { useState } from "react";
+
 import type { Student } from "@/features/students/types/studentType";
 import type { Book } from "@/features/books/types/bookType";
-import { assignBook } from "@/features/requests/services/request.service";
-import toast from "react-hot-toast";
-import { handleApiError } from "@/utils/errorHandler";
+
+import { useAssignBook } from "@/features/requests/hooks/useAssignBook";
+
+import Button from "@/components/ui/button/Button";
 
 type AssignBookModalProps = {
   students: Student[];
   books: Book[];
   onClose: () => void;
-  onSuccess: () => void;
 };
 
 export default function AssignBookModal({
   students,
   books,
   onClose,
-  onSuccess,
 }: AssignBookModalProps) {
+  const assignBookMutation = useAssignBook();
+
   const [studentId, setStudentId] = useState("");
   const [bookId, setBookId] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleAssign = async () => {
-    if (!studentId || !bookId) {
-      toast.error("Please select student and book");
-      return;
-    }
+  const handleAssign = () => {
+    if (!studentId || !bookId) return;
 
-    try {
-      setLoading(true);
-
-      await assignBook({
+    assignBookMutation.mutate(
+      {
         studentId,
         bookId,
         dueDate: dueDate || undefined,
-      });
-
-      toast.success("Book assigned successfully");
-
-      onSuccess();
-      onClose();
-    } catch (error) {
-      toast.error(handleApiError(error));
-    } finally {
-      setLoading(false);
-    }
+      },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      },
+    );
   };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      {" "}
       <div className="bg-[var(--bg-card)] rounded-2xl p-6 w-full max-w-md border border-[var(--border)]">
-        {" "}
         <h2 className="text-xl font-bold mb-5">Assign Book</h2>
+
         <div className="space-y-4">
           <select
             value={studentId}
@@ -92,6 +84,7 @@ export default function AssignBookModal({
             className="w-full p-3 rounded-xl border border-[var(--border)] bg-transparent"
           />
         </div>
+
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
@@ -100,13 +93,9 @@ export default function AssignBookModal({
             Cancel
           </button>
 
-          <button
-            onClick={handleAssign}
-            disabled={loading}
-            className="px-4 py-2 rounded-xl bg-[var(--primary)]"
-          >
-            {loading ? "Assigning..." : "Assign"}
-          </button>
+          <Button loading={assignBookMutation.isPending} onClick={handleAssign}>
+            Assign
+          </Button>
         </div>
       </div>
     </div>

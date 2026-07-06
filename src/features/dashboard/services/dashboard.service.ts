@@ -1,6 +1,6 @@
 import { getDashboardStatsApi, searchStudentsApi } from "../api/dashboardApi";
-
-export const getDashboardStats = async () => {
+import { DashboardStats } from "../types/dashboardTypes";
+export const getDashboardStats = async (): Promise<DashboardStats> => {
   const response = await getDashboardStatsApi();
 
   return response.data.data;

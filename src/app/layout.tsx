@@ -3,7 +3,7 @@ import { Inter, Rajdhani } from "next/font/google";
 import "./globals.css";
 import GlobalLoader from "@/components/GlobalLoader/globalLoader";
 import { Toaster } from "react-hot-toast";
-
+import QueryProvider from "@/providers/QueryProvider";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-primary",
@@ -35,9 +35,11 @@ export default function RootLayout({
     flex flex-col
   `}
       >
-        <GlobalLoader />
-        <Toaster position="top-right" />
-        {children}
+        <QueryProvider>
+          <GlobalLoader />
+          <Toaster position="top-right" />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );
