@@ -25,6 +25,7 @@ import TableActions from "@/components/ui/table/TableActions";
 import ArchiveBook from "./ArchiveBook";
 // Utils
 import { handleApiError } from "@/utils/errorHandler";
+import { capitalizeWords } from "@/utils/formatText";
 const columns = [
   {
     key: "id",
@@ -50,7 +51,7 @@ const columns = [
 ];
 
 function BooksContent() {
-  const { data: books = [], isLoading: loading, error, refetch } = useBooks();
+  const { data: books = [], isLoading: loading, error } = useBooks();
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -124,11 +125,11 @@ function BooksContent() {
                   {index + 1}
                 </td>
                 <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
-                  {book.bookName}
+                  {capitalizeWords(book.bookName)}
                 </td>
 
                 <td className="p-4 text-sm text-[var(--text-secondary)]">
-                  {book.author}
+                  {capitalizeWords(book.author)}{" "}
                 </td>
 
                 <td className="p-4">

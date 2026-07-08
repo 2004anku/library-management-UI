@@ -6,7 +6,7 @@ import type { Student } from "@/features/students/types/studentType";
 import type { Book } from "@/features/books/types/bookType";
 
 import { useAssignBook } from "@/features/requests/hooks/useAssignBook";
-
+import { capitalizeWords } from "@/utils/formatText";
 import Button from "@/components/ui/button/Button";
 
 type AssignBookModalProps = {
@@ -45,20 +45,39 @@ export default function AssignBookModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-[var(--bg-card)] rounded-2xl p-6 w-full max-w-md border border-[var(--border)]">
+      <div className="bg-[var(--bg-card)] rounded-2xl p-6 w-full max-w-xl border border-[var(--border)]">
         <h2 className="text-xl font-bold mb-5">Assign Book</h2>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <select
             value={studentId}
             onChange={(e) => setStudentId(e.target.value)}
-            className="w-full p-3 rounded-xl border border-[var(--border)] bg-transparent"
+            className=" w-full
+    p-3
+    rounded-xl
+    border border-[var(--border)]
+    bg-[var(--bg-card)]
+    text-[var(--text-primary)]
+    appearance-none
+    focus:outline-none
+    focus:ring-2
+    focus:ring-[var(--primary)]"
           >
-            <option value="">Select Student</option>
+            <option
+              value=""
+              className="bg-[var(--bg-card)] text-[var(--text-primary)]"
+            >
+              Select Student
+            </option>
 
             {students.map((student) => (
-              <option key={student._id} value={student._id}>
-                {student.studentName}
+              <option
+                key={student._id}
+                value={student._id}
+                className="bg-[var(--bg-card)] text-[var(--text-primary)]"
+              >
+                {capitalizeWords(student.studentName)} •{" "}
+                {capitalizeWords(student.course)} • Sem {student.semester}
               </option>
             ))}
           </select>
@@ -68,13 +87,25 @@ export default function AssignBookModal({
             onChange={(e) => setBookId(e.target.value)}
             className="w-full p-3 rounded-xl border border-[var(--border)] bg-transparent"
           >
-            <option value="">Select Book</option>
-
-            {books.map((book) => (
-              <option key={book._id} value={book._id}>
-                {book.bookName}
-              </option>
-            ))}
+            <option
+              value=""
+              className="bg-[var(--bg-card)] text-[var(--text-primary)]"
+            >
+              Select Book
+            </option>
+            {books
+              .filter((book) => book.availableCopies > 0)
+              .map((book) => (
+                <option
+                  key={book._id}
+                  value={book._id}
+                  className="bg-[var(--bg-card)] text-[var(--text-primary)]"
+                >
+                  {capitalizeWords(book.bookName)}
+                  {capitalizeWords(book.author)}({book.availableCopies}{" "}
+                  Available)
+                </option>
+              ))}
           </select>
 
           <input
@@ -93,7 +124,11 @@ export default function AssignBookModal({
             Cancel
           </button>
 
-          <Button loading={assignBookMutation.isPending} onClick={handleAssign}>
+          <Button
+            loading={assignBookMutation.isPending}
+            onClick={handleAssign}
+            disabled={!studentId || !bookId}
+          >
             Assign
           </Button>
         </div>

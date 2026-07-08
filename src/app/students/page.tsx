@@ -25,7 +25,7 @@ import ArchiveStudent from "@/app/students/ArchiveStudent";
 import ErrorState from "@/components/ui/errorState";
 import EmptyState from "@/components/ui/emptyState";
 import type { Student } from "@/features/students/types/studentType";
-
+import { capitalizeWords } from "@/utils/formatText";
 const columns = [
   { key: "id", label: "ID", width: "10%" },
   { key: "studentName", label: "Student Name", width: "20%" },
@@ -45,7 +45,7 @@ function StudentsContent() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState("");
   const router = useRouter();
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Student[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const filteredStudents = students.filter(
@@ -144,7 +144,9 @@ function StudentsContent() {
             hover:bg-[var(--table-hover)]
           "
                       >
-                        <div className="font-medium">{student.studentName}</div>
+                        <div className="font-medium">
+                          {capitalizeWords(student.studentName)}
+                        </div>
 
                         <div className="text-xs text-gray-400">
                           {student.email}
@@ -178,11 +180,11 @@ function StudentsContent() {
                 </td>
 
                 <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
-                  {student.studentName}
+                  {capitalizeWords(student.studentName)}
                 </td>
 
                 <td className="p-4 text-sm text-[var(--text-secondary)]">
-                  {student.course}
+                  {capitalizeWords(student.course)}
                 </td>
 
                 <td className="p-4 text-sm text-[var(--text-secondary)]">

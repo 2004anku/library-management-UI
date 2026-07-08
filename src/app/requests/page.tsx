@@ -2,14 +2,13 @@
 // Next/React
 import { useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { Check, X, Pencil, Trash2 } from "lucide-react";
+import { Check, X, Pencil } from "lucide-react";
 
 // Services
 import { useRequests } from "@/features/requests/hooks/useRequests";
 import { useApproveRequest } from "@/features/requests/hooks/useApproveRequest";
 import { useRejectRequest } from "@/features/requests/hooks/useRejectRequest";
 import { useUpdateRequestStatus } from "@/features/requests/hooks/useUpdateRequestStatus";
-import { useDeleteRequest } from "@/features/requests/hooks/useDeleteRequest";
 import { useAcceptReturnRequest } from "@/features/requests/hooks/useAcceptReturnRequest";
 import { useStudents } from "@/features/students/hooks/useStudents";
 import { useBooks } from "@/features/books/hooks/useBooks";
@@ -33,6 +32,7 @@ import type { Request } from "@/features/requests/types/requestTypes";
 import SearchInput from "@/components/ui/input/SearchInput";
 //Utils
 import { requestStatusConfig } from "@/app/requests/requestStatusTheme";
+import { capitalizeWords } from "@/utils/formatText";
 
 function RequestsContent() {
   const { data: requests = [], isLoading: loading, error } = useRequests();
@@ -46,7 +46,6 @@ function RequestsContent() {
   const approveRequestMutation = useApproveRequest();
   const rejectRequestMutation = useRejectRequest();
   const updateRequestStatusMutation = useUpdateRequestStatus();
-  const deleteRequestMutation = useDeleteRequest();
   const acceptReturnRequestMutation = useAcceptReturnRequest();
   const columns = [
     {
@@ -124,11 +123,6 @@ function RequestsContent() {
       request.bookId?.bookName?.toLowerCase().includes(search.toLowerCase()) ||
       request.status?.toLowerCase().includes(search.toLowerCase()),
   );
-  const handleDeleteRequest = (issueId: string) => {
-    if (!window.confirm("Delete this rejected request?")) return;
-
-    deleteRequestMutation.mutate(issueId);
-  };
 
   const handleAcceptReturn = (issueId: string) => {
     acceptReturnRequestMutation.mutate(issueId);
@@ -169,11 +163,11 @@ function RequestsContent() {
                 </td>
 
                 <td className="p-4 text-sm font-medium text-[var(--text-primary)]">
-                  {request.studentId?.studentName || "N/A"}
+                  {capitalizeWords(request.studentId?.studentName) || "N/A"}
                 </td>
 
                 <td className="p-4 text-sm text-[var(--text-secondary)]">
-                  {request.bookId?.bookName || "N/A"}
+                  {capitalizeWords(request.bookId?.bookName) || "N/A"}
                 </td>
 
                 <td className="p-4">
@@ -255,7 +249,19 @@ function RequestsContent() {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full border p-2 rounded-lg mb-4 bg-transparent"
+                className="
+    w-full
+    p-3
+    rounded-xl
+    border
+    border-[var(--border)]
+    bg-[var(--bg-card)]
+    text-[var(--text-primary)]
+    focus:outline-none
+    focus:ring-2
+    focus:ring-[var(--primary)]
+    mb-5
+  "
               >
                 <option value="issued">Issued</option>
                 <option value="rejected">Rejected</option>
