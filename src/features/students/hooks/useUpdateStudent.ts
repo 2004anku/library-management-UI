@@ -1,8 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-
+import { invalidateAppData } from "@/lib/query/invalidateAppData";
 import { updateStudent } from "../services/student.service";
-import { studentKeys } from "./studentKeys";
 import { handleApiError } from "@/utils/errorHandler";
 import type { Student } from "../types/studentType";
 
@@ -23,8 +22,9 @@ export const useUpdateStudent = () => {
     onSuccess: () => {
       toast.success("Student updated successfully");
 
-      queryClient.invalidateQueries({
-        queryKey: studentKeys.all,
+      invalidateAppData(queryClient, {
+        students: true,
+        dashboard: true,
       });
     },
 

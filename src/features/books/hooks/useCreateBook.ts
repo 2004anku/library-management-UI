@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { bookKeys } from "./bookKeys";
 import { createBook } from "../services/book.service";
 import type { CreateBookPayload } from "../types/bookType";
-
+import { invalidateAppData } from "@/lib/query/invalidateAppData";
 import { handleApiError } from "@/utils/errorHandler";
 
 export const useCreateBook = () => {
@@ -15,8 +15,9 @@ export const useCreateBook = () => {
     onSuccess: () => {
       toast.success("Book created successfully");
 
-      queryClient.invalidateQueries({
-        queryKey: bookKeys.all,
+      invalidateAppData(queryClient, {
+        books: true,
+        dashboard: true,
       });
     },
 

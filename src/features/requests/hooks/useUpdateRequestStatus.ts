@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-
+import { invalidateAppData } from "@/lib/query/invalidateAppData";
 import { updateRequestStatus } from "../services/request.service";
 import { requestKeys } from "./requestKeys";
 import { handleApiError } from "@/utils/errorHandler";
@@ -15,8 +15,9 @@ export const useUpdateRequestStatus = () => {
     onSuccess: () => {
       toast.success("Request updated successfully");
 
-      queryClient.invalidateQueries({
-        queryKey: requestKeys.all,
+      invalidateAppData(queryClient, {
+        requests: true,
+        dashboard: true,
       });
     },
 

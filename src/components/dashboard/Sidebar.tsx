@@ -3,7 +3,12 @@
 import { useRouter } from "next/navigation";
 import { logoutUser } from "@/features/auth/services/auth.service";
 import Link from "next/link";
-
+import {
+  prefetchBooks,
+  prefetchStudents,
+  prefetchRequests,
+  prefetchDashboard,
+} from "@/lib/prefetch/prefetch";
 import {
   FaBook,
   FaUserGraduate,
@@ -47,6 +52,8 @@ export default function Sidebar() {
           <li>
             <Link
               href="/"
+              onMouseEnter={prefetchDashboard}
+              onFocus={prefetchDashboard}
               className="flex items-center gap-3 px-4 py-3 rounded-xl
   hover:bg-slate-800/70
   hover:translate-x-1
@@ -60,6 +67,8 @@ export default function Sidebar() {
           <li>
             <Link
               href="/books"
+              onMouseEnter={prefetchBooks}
+              onFocus={prefetchBooks}
               className="flex items-center gap-3 px-4 py-3 rounded-xl
   hover:bg-slate-800/70
   hover:translate-x-1
@@ -73,6 +82,8 @@ export default function Sidebar() {
           <li>
             <Link
               href="/students"
+              onMouseEnter={prefetchStudents}
+              onFocus={prefetchStudents}
               className="flex items-center gap-3 px-4 py-3 rounded-xl
   hover:bg-slate-800/70
   hover:translate-x-1
@@ -86,6 +97,8 @@ export default function Sidebar() {
           <li>
             <Link
               href="/requests"
+              onMouseEnter={prefetchRequests}
+              onFocus={prefetchRequests}
               className="flex items-center gap-3 px-4 py-3 rounded-xl
   hover:bg-slate-800/70
   hover:translate-x-1

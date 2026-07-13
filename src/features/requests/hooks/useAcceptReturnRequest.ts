@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-
+import { invalidateAppData } from "@/lib/query/invalidateAppData";
 import { acceptReturnRequest } from "../services/request.service";
 import { requestKeys } from "./requestKeys";
 import { handleApiError } from "@/utils/errorHandler";
@@ -14,8 +14,11 @@ export const useAcceptReturnRequest = () => {
     onSuccess: () => {
       toast.success("Book returned successfully");
 
-      queryClient.invalidateQueries({
-        queryKey: requestKeys.all,
+      invalidateAppData(queryClient, {
+        requests: true,
+        books: true,
+        students: true,
+        dashboard: true,
       });
     },
 

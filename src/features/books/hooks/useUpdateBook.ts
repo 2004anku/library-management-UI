@@ -4,6 +4,7 @@ import { bookKeys } from "./bookKeys";
 import { updateBook } from "../services/book.service";
 import { handleApiError } from "@/utils/errorHandler";
 import type { Book } from "../types/bookType";
+import { invalidateAppData } from "@/lib/query/invalidateAppData";
 
 type UpdateBookPayload = {
   bookId: string;
@@ -19,8 +20,10 @@ export const useUpdateBook = () => {
 
     onSuccess: () => {
       toast.success("Book updated successfully");
-      queryClient.invalidateQueries({
-        queryKey: bookKeys.all,
+
+      invalidateAppData(queryClient, {
+        books: true,
+        dashboard: true,
       });
     },
 
