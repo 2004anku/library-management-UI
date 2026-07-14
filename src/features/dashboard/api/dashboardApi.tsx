@@ -7,3 +7,6 @@ export const getDashboardStatsApi = async () => {
 export const searchStudentsApi = async (query: string) => {
   return await api.get(`/admin/dashboard/search-students?q=${query}`);
 };
+export const getDashboardChartsApi = async () => {
+  return await api.get("/admin/dashboard/charts");
+};

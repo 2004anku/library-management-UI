@@ -1,42 +1,24 @@
 import { QueryClient } from "@tanstack/react-query";
 
-import { studentKeys } from "@/features/students/hooks/studentKeys";
+import { dashboardKeys } from "@/features/dashboard/hooks/dashboardKeys";
 import { bookKeys } from "@/features/books/hooks/bookKeys";
+import { studentKeys } from "@/features/students/hooks/studentKeys";
 import { requestKeys } from "@/features/requests/hooks/requestKeys";
-import { queryKeys } from "@/lib/tanstack/queryKeys";
 
-type InvalidateOptions = {
-  students?: boolean;
-  books?: boolean;
-  requests?: boolean;
-  dashboard?: boolean;
-};
+export const invalidateAppData = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({
+    queryKey: dashboardKeys.stats,
+  });
 
-export const invalidateAppData = (
-  queryClient: QueryClient,
-  options: InvalidateOptions,
-) => {
-  if (options.students) {
-    queryClient.invalidateQueries({
-      queryKey: studentKeys.all,
-    });
-  }
+  queryClient.invalidateQueries({
+    queryKey: bookKeys.all,
+  });
 
-  if (options.books) {
-    queryClient.invalidateQueries({
-      queryKey: bookKeys.all,
-    });
-  }
+  queryClient.invalidateQueries({
+    queryKey: studentKeys.all,
+  });
 
-  if (options.requests) {
-    queryClient.invalidateQueries({
-      queryKey: requestKeys.all,
-    });
-  }
-
-  if (options.dashboard) {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.dashboard,
-    });
-  }
+  queryClient.invalidateQueries({
+    queryKey: requestKeys.all,
+  });
 };
