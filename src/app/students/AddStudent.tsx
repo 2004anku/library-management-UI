@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/ui/button/Button";
 import { useCreateStudent } from "@/features/students/hooks/useCreateStudent";
-
+import { capitalizeWords, formatPhoneNumber } from "../../utils/formatText";
 type Props = {
   onClose: () => void;
 };
@@ -30,7 +30,12 @@ export default function AddStudentModal({ onClose }: Props) {
   };
 
   const handleSubmit = async () => {
-    await createStudentMutation.mutateAsync(formData);
+    await createStudentMutation.mutateAsync({
+      ...formData,
+      studentName: capitalizeWords(formData.studentName),
+      course: capitalizeWords(formData.course),
+      phone: formatPhoneNumber(formData.phone),
+    });
 
     onClose();
   };

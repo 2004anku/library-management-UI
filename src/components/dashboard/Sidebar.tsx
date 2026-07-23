@@ -1,124 +1,139 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { logoutUser } from "@/features/auth/services/auth.service";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+
+import { storage } from "@/utils/storage";
+import { logoutUser } from "@/features/auth/services/auth.service";
+
 import {
   prefetchBooks,
-  prefetchStudents,
-  prefetchRequests,
   prefetchDashboard,
+  prefetchRequests,
+  prefetchStudents,
 } from "@/lib/prefetch/prefetch";
+
 import {
   FaBook,
-  FaUserGraduate,
   FaClipboardList,
   FaHome,
   FaSignOutAlt,
+  FaUserGraduate,
 } from "react-icons/fa";
-import { FaBookOpen, FaBookOpenReader } from "react-icons/fa6";
+
+import { FaBookOpen } from "react-icons/fa6";
 
 export default function Sidebar() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const user = storage.getUser();
+
+  const menuItems = [
+    {
+      title: "Dashboard",
+      href: "/",
+      icon: FaHome,
+      prefetch: prefetchDashboard,
+    },
+    {
+      title: "Books",
+      href: "/books",
+      icon: FaBook,
+      prefetch: prefetchBooks,
+    },
+    {
+      title: "Students",
+      href: "/students",
+      icon: FaUserGraduate,
+      prefetch: prefetchStudents,
+    },
+    {
+      title: "Requests",
+      href: "/requests",
+      icon: FaClipboardList,
+      prefetch: prefetchRequests,
+    },
+  ];
 
   const handleLogout = () => {
     logoutUser();
     router.replace("/login");
   };
-  return (
-    <div className="w-full md:w-64 bg-[var(--bg-sidebar)] border-r border-slate-800/60 p-6 flex flex-col justify-between shrink-0">
-      {/* Admin Info */}
-      <div>
-        <div className="mb-8">
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-            <FaBookOpen className="text-[var(--primary)] text-3xl" />
 
-            <span>
-              Book<span className="text-[var(--primary)]">Hub</span>
-            </span>
+  return (
+    <aside className="w-64 bg-[var(--bg-sidebar)] border-r border-slate-800 flex flex-col justify-between p-6">
+      <div>
+        {/* Logo */}
+        <div className="mb-8">
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
+            {/* <FaBookOpen className="text-[var(--primary)] text-3xl" /> */}
+
+            <div>
+              <h1 className="text-xl font-bold text-[var(--text-primary)] leading-tight">
+                {user?.collegeName || "BookHub"}
+              </h1>
+
+              {user?.libraryName && (
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  {user.libraryName}
+                </p>
+              )}
+            </div>
           </h1>
 
-          <div className="mt-4 bg-[var(--bg-card)] rounded-xl p-4">
-            <h2 className="font-semibold text-[var(--text-primary)]">Vikram</h2>
+          {/* User Card */}
+          <div className="mt-6 rounded-xl bg-[var(--bg-card)] p-4">
+            <h2 className="font-semibold text-[var(--text-primary)]">
+              {user?.fullName}
+            </h2>
 
             <p className="text-sm text-[var(--text-secondary)]">
-              admin@bookhub.com
+              {user?.email}
             </p>
+
+            <span className="inline-block mt-3 rounded-full bg-indigo-500/15 px-3 py-1 text-xs text-indigo-400 capitalize">
+              {user?.role}
+            </span>
           </div>
         </div>
 
-        {/* Menu */}
-        <ul className="space-y-3">
-          <li>
-            <Link
-              href="/"
-              onMouseEnter={prefetchDashboard}
-              onFocus={prefetchDashboard}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl
-  hover:bg-slate-800/70
-  hover:translate-x-1
-  transition-all duration-200"
-            >
-              <FaHome />
-              Dashboard
-            </Link>
-          </li>
+        {/* Navigation */}
+        <nav className="space-y-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
 
-          <li>
-            <Link
-              href="/books"
-              onMouseEnter={prefetchBooks}
-              onFocus={prefetchBooks}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl
-  hover:bg-slate-800/70
-  hover:translate-x-1
-  transition-all duration-200"
-            >
-              <FaBook />
-              Books
-            </Link>
-          </li>
+            const active = pathname === item.href;
 
-          <li>
-            <Link
-              href="/students"
-              onMouseEnter={prefetchStudents}
-              onFocus={prefetchStudents}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl
-  hover:bg-slate-800/70
-  hover:translate-x-1
-  transition-all duration-200"
-            >
-              <FaUserGraduate />
-              Students
-            </Link>
-          </li>
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onMouseEnter={item.prefetch}
+                onFocus={item.prefetch}
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 ${
+                  active
+                    ? "bg-[var(--primary)] text-white"
+                    : "text-[var(--text-secondary)] hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                <Icon />
 
-          <li>
-            <Link
-              href="/requests"
-              onMouseEnter={prefetchRequests}
-              onFocus={prefetchRequests}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl
-  hover:bg-slate-800/70
-  hover:translate-x-1
-  transition-all duration-200"
-            >
-              <FaClipboardList />
-              Requests
-            </Link>
-          </li>
-        </ul>
+                {item.title}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Logout */}
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[var(--danger)] transition-all duration-200"
+        className="flex items-center gap-3 rounded-xl px-4 py-3 text-red-400 hover:bg-red-500/10 transition"
       >
         <FaSignOutAlt />
         Logout
       </button>
-    </div>
+    </aside>
   );
 }

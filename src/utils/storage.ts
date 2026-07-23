@@ -1,6 +1,6 @@
 const TOKEN_KEY = "token";
 const USER_KEY = "user";
-
+import { User } from "./user";
 export const storage = {
   getToken: () => {
     if (typeof window === "undefined") return null;
@@ -20,7 +20,7 @@ export const storage = {
     localStorage.removeItem(TOKEN_KEY);
   },
 
-  getUser: () => {
+  getUser: (): User | null => {
     if (typeof window === "undefined") return null;
 
     const user = localStorage.getItem(USER_KEY);
@@ -28,7 +28,7 @@ export const storage = {
     return user ? JSON.parse(user) : null;
   },
 
-  setUser: (user: any) => {
+  setUser: (user: User) => {
     if (typeof window === "undefined") return;
 
     localStorage.setItem(USER_KEY, JSON.stringify(user));

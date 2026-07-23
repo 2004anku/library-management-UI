@@ -90,9 +90,6 @@ function RequestsContent() {
     );
   }
 
-  if (requests.length === 0) {
-    return <EmptyState message="No requests found." />;
-  }
   const handleApprove = (issueId: string) => {
     approveRequestMutation.mutate(issueId);
   };

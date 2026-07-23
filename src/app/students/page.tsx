@@ -72,7 +72,6 @@ function StudentsContent() {
   }, []);
   if (loading) return <LoadingState message="" />;
   if (error) return <ErrorState message="Failed to load students." />;
-  if (!students.length) return <EmptyState message="No students found." />;
 
   const handleEdit = (student: Student) => {
     setSelectedStudent(student);

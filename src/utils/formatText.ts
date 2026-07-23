@@ -11,7 +11,7 @@ export const capitalizeWords = (text?: string | null): string => {
 export const capitalizeFirstLetter = (text?: string | null): string => {
   if (!text) return "";
 
-  return text.charAt(0).toUpperCase() + text.slice(1);
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
 
 /**
@@ -24,6 +24,21 @@ export const toUpperCase = (text?: string | null): string => {
 /**
  * Converts text to lowercase.
  */
-export const toLowerCase = (text?: string | null): string => {
-  return text ? text.toLowerCase() : "";
+export const formatPhoneNumber = (phone?: string | null): string => {
+  if (!phone) return "";
+
+  // Keep only digits
+  let number = phone.replace(/\D/g, "");
+
+  // Remove country code if user entered it
+  if (number.startsWith("91") && number.length === 12) {
+    number = number.slice(2);
+  }
+
+  // Remove leading zero
+  if (number.startsWith("0")) {
+    number = number.slice(1);
+  }
+
+  return `+91${number}`;
 };

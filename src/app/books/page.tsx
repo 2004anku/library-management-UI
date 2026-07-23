@@ -66,9 +66,6 @@ function BooksContent() {
     return <ErrorState message={handleApiError(error)} />;
   }
 
-  if (books.length === 0) {
-    return <EmptyState message="No books found." />;
-  }
   const handleDelete = (bookId: string) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this book?",
