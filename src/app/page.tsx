@@ -1,7 +1,7 @@
 "use client";
 
 import ProtectedRoute from "@/components/auth/protectedRoutes";
-import Sidebar from "@/components/dashboard/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 

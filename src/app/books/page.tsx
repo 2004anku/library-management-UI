@@ -15,7 +15,7 @@ import EmptyState from "@/components/ui/emptyState";
 import EditBook from "@/app/books/EditBook";
 import AddBook from "@/app/books/AddBook";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
-import Sidebar from "@/components/dashboard/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import { Button } from "@/components/ui";
 import { SearchInput } from "@/components/ui";
 import DataTable from "@/components/ui/table/DataTable";

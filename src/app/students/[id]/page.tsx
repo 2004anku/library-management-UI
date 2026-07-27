@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import Sidebar from "@/components/dashboard/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import LoadingState from "@/components/ui/loadingState";
 import ErrorState from "@/components/ui/errorState";
 

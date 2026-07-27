@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-
+import { useProfile } from "@/features/profile/hooks/useprofile";
 import { storage } from "@/utils/storage";
 import { logoutUser } from "@/features/auth/services/auth.service";
 
@@ -21,14 +21,12 @@ import {
   FaUserGraduate,
 } from "react-icons/fa";
 
-import { FaBookOpen } from "react-icons/fa6";
-
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
 
   const user = storage.getUser();
-
+  const { data: profile, isLoading } = useProfile();
   const menuItems = [
     {
       title: "Dashboard",
@@ -71,31 +69,52 @@ export default function Sidebar() {
 
             <div>
               <h1 className="text-xl font-bold text-[var(--text-primary)] leading-tight">
-                {user?.collegeName || "BookHub"}
+                {profile?.collegeName || "BookHub"}
               </h1>
 
-              {user?.libraryName && (
+              {profile?.libraryName && (
                 <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  {user.libraryName}
+                  {profile.libraryName}
                 </p>
               )}
             </div>
           </h1>
 
           {/* User Card */}
-          <div className="mt-6 rounded-xl bg-[var(--bg-card)] p-4">
-            <h2 className="font-semibold text-[var(--text-primary)]">
-              {user?.fullName}
-            </h2>
+          <Link href="/profile">
+            <div
+              className="
+      mt-6
+      rounded-xl
+      bg-[var(--bg-card)]
+      p-4
+      cursor-pointer
+      transition-all
+      duration-200
+      border
+      border-transparent
+      hover:border-[var(--primary)]
+      hover:bg-slate-700
+      hover:shadow-lg
+    "
+            >
+              <h2 className="font-semibold text-[var(--text-primary)]">
+                {profile?.fullName}
+              </h2>
 
-            <p className="text-sm text-[var(--text-secondary)]">
-              {user?.email}
-            </p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                {profile?.email}
+              </p>
 
-            <span className="inline-block mt-3 rounded-full bg-indigo-500/15 px-3 py-1 text-xs text-indigo-400 capitalize">
-              {user?.role}
-            </span>
-          </div>
+              <span className="inline-block mt-3 rounded-full bg-indigo-500/15 px-3 py-1 text-xs text-indigo-400 capitalize">
+                {profile?.role}
+              </span>
+
+              <p className="mt-3 text-xs text-[var(--primary)]">
+                View Profile →
+              </p>
+            </div>
+          </Link>
         </div>
 
         {/* Navigation */}

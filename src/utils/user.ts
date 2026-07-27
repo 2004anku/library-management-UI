@@ -4,9 +4,9 @@ export interface User {
   email: string;
   role: string;
 
-  collegeId: string | null;
-  libraryId: string | null;
-
+  collegeId: string;
   collegeName: string;
+
+  libraryId: string;
   libraryName: string;
 }

@@ -1,7 +1,7 @@
 "use client";
 // Next/React
 import { useState } from "react";
-import Sidebar from "@/components/dashboard/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import { Check, X, Pencil } from "lucide-react";
 
 // Services

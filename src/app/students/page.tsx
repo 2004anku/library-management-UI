@@ -7,7 +7,7 @@ import { useStudents } from "@/features/students/hooks/useStudents";
 import { useDeleteStudent } from "@/features/students/hooks/useDeleteStudent";
 // Components
 
-import Sidebar from "@/components/dashboard/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import AddStudent from "@/app/students/AddStudent";
 import EditStudent from "@/app/students/EditStudent";
 import ProtectedRoute from "@/components/auth/protectedRoutes";
