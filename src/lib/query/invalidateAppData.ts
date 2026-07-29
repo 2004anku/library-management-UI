@@ -8,6 +8,10 @@ import { profileKeys } from "@/features/profile/hooks/profileKeys";
 
 export const invalidateAppData = (queryClient: QueryClient) => {
   queryClient.invalidateQueries({
+    queryKey: profileKeys.profile,
+  });
+
+  queryClient.invalidateQueries({
     queryKey: dashboardKeys.stats,
   });
 
@@ -21,8 +25,5 @@ export const invalidateAppData = (queryClient: QueryClient) => {
 
   queryClient.invalidateQueries({
     queryKey: requestKeys.all,
-  });
-  queryClient.invalidateQueries({
-    queryKey: profileKeys.profile,
   });
 };

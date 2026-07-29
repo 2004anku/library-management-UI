@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useProfile } from "@/features/profile/hooks/useprofile";
-import { storage } from "@/utils/storage";
+
 import { logoutUser } from "@/features/auth/services/auth.service";
+import { useProfile } from "@/features/profile/hooks/useProfile";
 
 import {
   prefetchBooks,
@@ -19,14 +19,15 @@ import {
   FaHome,
   FaSignOutAlt,
   FaUserGraduate,
+  FaUserCircle,
 } from "react-icons/fa";
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const user = storage.getUser();
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile } = useProfile();
+
   const menuItems = [
     {
       title: "Dashboard",
@@ -64,53 +65,51 @@ export default function Sidebar() {
       <div>
         {/* Logo */}
         <div className="mb-8">
-          <h1 className="flex items-center gap-2 text-2xl font-bold">
-            {/* <FaBookOpen className="text-[var(--primary)] text-3xl" /> */}
-
-            <div>
-              <h1 className="text-xl font-bold text-[var(--text-primary)] leading-tight">
-                {profile?.collegeName || "BookHub"}
-              </h1>
-
-              {profile?.libraryName && (
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  {profile.libraryName}
-                </p>
-              )}
-            </div>
+          <h1 className="text-xl font-bold text-[var(--text-primary)]">
+            {profile?.collegeId?.collegeName || "BookHub"}
           </h1>
+
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
+            {profile?.libraryId?.libraryName || ""}
+          </p>
 
           {/* User Card */}
           <Link href="/profile">
             <div
               className="
-      mt-6
-      rounded-xl
-      bg-[var(--bg-card)]
-      p-4
-      cursor-pointer
-      transition-all
-      duration-200
-      border
-      border-transparent
-      hover:border-[var(--primary)]
-      hover:bg-slate-700
-      hover:shadow-lg
-    "
+                mt-6
+                rounded-xl
+                border
+                border-transparent
+                bg-[var(--bg-card)]
+                p-4
+                cursor-pointer
+                transition-all
+                duration-200
+                hover:border-[var(--primary)]
+                hover:bg-slate-800
+                hover:shadow-lg
+              "
             >
-              <h2 className="font-semibold text-[var(--text-primary)]">
-                {profile?.fullName}
-              </h2>
+              <div className="flex items-center gap-3">
+                <FaUserCircle className="text-4xl text-[var(--primary)]" />
 
-              <p className="text-sm text-[var(--text-secondary)]">
-                {profile?.email}
-              </p>
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate font-semibold text-[var(--text-primary)]">
+                    {profile?.fullName}
+                  </h2>
 
-              <span className="inline-block mt-3 rounded-full bg-indigo-500/15 px-3 py-1 text-xs text-indigo-400 capitalize">
+                  <p className="truncate text-sm text-[var(--text-secondary)]">
+                    {profile?.email}
+                  </p>
+                </div>
+              </div>
+
+              <span className="mt-4 inline-block rounded-full bg-indigo-500/15 px-3 py-1 text-xs text-indigo-400 capitalize">
                 {profile?.role}
               </span>
 
-              <p className="mt-3 text-xs text-[var(--primary)]">
+              <p className="mt-4 text-xs font-medium text-[var(--primary)]">
                 View Profile →
               </p>
             </div>
@@ -137,7 +136,6 @@ export default function Sidebar() {
                 }`}
               >
                 <Icon />
-
                 {item.title}
               </Link>
             );
@@ -148,7 +146,7 @@ export default function Sidebar() {
       {/* Logout */}
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 rounded-xl px-4 py-3 text-red-400 hover:bg-red-500/10 transition"
+        className="flex items-center gap-3 rounded-xl px-4 py-3 text-red-400 transition hover:bg-red-500/10"
       >
         <FaSignOutAlt />
         Logout

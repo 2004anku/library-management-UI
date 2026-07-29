@@ -3,35 +3,41 @@
 import ProtectedRoute from "@/components/auth/protectedRoutes";
 import Sidebar from "@/components/sidebar/Sidebar";
 
-import ProfileCard from "@/features/profile/components/profileCard";
-import ProfileInfo from "@/features/profile/components/profileInfo";
+import ProfileCard from "@/features/profile/components/ProfileCard";
+import PersonalInfoCard from "@/features/profile/components/personalInfoCard";
+import CollegeInfoCard from "@/features/profile/components/collegeInfoCard";
+import LibraryInfoCard from "@/features/profile/components/libraryInfoCard";
 
 export default function ProfilePage() {
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-[var(--bg-main)]">
         <Sidebar />
 
-        <main className="flex-1 p-8 bg-[var(--bg-main)]">
+        <main className="flex-1 overflow-y-auto p-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-              Admin Profile
+            <h1 className="heading-font text-3xl font-bold text-[var(--text-primary)]">
+              My Profile
             </h1>
 
-            <p className="text-[var(--text-secondary)] mt-2">
-              View and manage your account information.
+            <p className="mt-2 text-[var(--text-secondary)]">
+              Manage your personal information, college and library details.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            {/* Left */}
+          <div className="grid gap-6 xl:grid-cols-3">
+            {/* Left Side */}
             <div>
               <ProfileCard />
             </div>
 
-            {/* Right */}
-            <div className="xl:col-span-2">
-              <ProfileInfo />
+            {/* Right Side */}
+            <div className="space-y-6 xl:col-span-2">
+              <PersonalInfoCard />
+
+              <CollegeInfoCard />
+
+              <LibraryInfoCard />
             </div>
           </div>
         </main>
