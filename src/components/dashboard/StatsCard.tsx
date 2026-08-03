@@ -16,45 +16,61 @@ export default function StatsCard({
   return (
     <div
       className="
-      bg-[var(--bg-card)]
-      border border-slate-800
-      rounded-2xl
-      p-6
-      shadow-sm
-      hover:border-[var(--primary)]
-      hover:-translate-y-1
-      transition-all
-      duration-300
-    "
+        group
+        relative
+        overflow-hidden
+        rounded-2xl
+        border
+        border-slate-800
+        bg-[var(--bg-card)]
+        p-6
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:border-[var(--primary)]
+        hover:shadow-2xl
+      "
     >
-      <div className="flex justify-between items-center mb-5">
-        <div>
-          <p className="text-sm text-[var(--text-secondary)]">{title}</p>
+      {/* Top Accent */}
+      <div className="absolute left-0 top-0 h-1 w-full bg-[var(--primary)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-          <h2 className="text-4xl font-bold text-[var(--text-primary)] mt-2">
-            {value}
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm font-medium tracking-wide text-[var(--text-secondary)]">
+            {title}
+          </p>
+
+          <h2 className="mt-3 text-4xl font-bold tracking-tight text-[var(--text-primary)]">
+            {value.toLocaleString()}
           </h2>
         </div>
 
         <div
           className="
-          h-14
-          w-14
-          rounded-xl
-          flex
-          items-center
-          justify-center
-          bg-[var(--primary)]/10
-          text-[var(--primary)]
-          text-2xl
-        "
+            flex
+            h-14
+            w-14
+            items-center
+            justify-center
+            rounded-full
+            bg-[var(--primary)]/10
+            text-2xl
+            text-[var(--primary)]
+            transition-transform
+            duration-300
+            group-hover:scale-110
+          "
         >
           {icon}
         </div>
       </div>
 
+      {/* Footer */}
       {description && (
-        <p className="text-sm text-[var(--text-secondary)]">{description}</p>
+        <div className="mt-6 border-t border-slate-800 pt-4">
+          <p className="text-sm text-[var(--text-secondary)]">{description}</p>
+        </div>
       )}
     </div>
   );

@@ -31,7 +31,7 @@ function DashboardContent() {
     <div className="flex min-h-screen">
       <Sidebar />
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 bg-[var(--bg-main)] p-8 overflow-y-auto">
         <DashboardHeader />
 
         <DashboardStats

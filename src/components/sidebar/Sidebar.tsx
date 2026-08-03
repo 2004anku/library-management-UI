@@ -77,19 +77,19 @@ export default function Sidebar() {
           <Link href="/profile">
             <div
               className="
-                mt-6
-                rounded-xl
-                border
-                border-transparent
-                bg-[var(--bg-card)]
-                p-4
-                cursor-pointer
-                transition-all
-                duration-200
-                hover:border-[var(--primary)]
-                hover:bg-slate-800
-                hover:shadow-lg
-              "
+                  mt-6
+                  rounded-xl
+                  border
+                  border-transparent
+                  bg-[var(--bg-card)]
+                  p-4
+                  cursor-pointer
+                  transition-all
+                  duration-200
+                  hover:border-[var(--primary)]
+                  hover:bg-slate-800
+                  hover:shadow-lx
+                "
             >
               <div className="flex items-center gap-3">
                 <FaUserCircle className="text-4xl text-[var(--primary)]" />
