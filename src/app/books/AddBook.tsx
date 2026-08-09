@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Upload, Download, FileSpreadsheet } from "lucide-react";
+import { useRef, useState } from "react";
+import { Download, FileSpreadsheet, Upload } from "lucide-react";
 
 import Button from "@/components/ui/button/Button";
 import Modal from "@/components/ui/model/model";
@@ -26,6 +26,10 @@ export default function AddBookModal({ onClose }: Props) {
     price: 0,
   });
 
+  // ---------------------------------------
+  // FORM CHANGE
+  // ---------------------------------------
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -36,13 +40,21 @@ export default function AddBookModal({ onClose }: Props) {
     }));
   };
 
+  // ---------------------------------------
+  // CREATE BOOK
+  // ---------------------------------------
+
   const handleSubmit = async () => {
     await createBookMutation.mutateAsync(formData);
 
     onClose();
   };
 
-  const uploadExcel = () => {
+  // ---------------------------------------
+  // EXCEL UPLOAD
+  // ---------------------------------------
+
+  const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
@@ -51,111 +63,166 @@ export default function AddBookModal({ onClose }: Props) {
 
     if (!file) return;
 
-    console.log(file);
+    const allowedExtensions = [".xlsx", ".xls"];
+
+    const fileName = file.name.toLowerCase();
+
+    const isExcelFile = allowedExtensions.some((extension) =>
+      fileName.endsWith(extension),
+    );
+
+    if (!isExcelFile) {
+      alert("Please select a valid Excel file.");
+      e.target.value = "";
+      return;
+    }
+
+    console.log("Selected Excel file:", file);
+
+    // TODO:
+    // Connect bulk import API here.
   };
+
+  // ---------------------------------------
+  // DOWNLOAD TEMPLATE
+  // ---------------------------------------
+
+  const handleDownloadTemplate = () => {
+    const headers = "Book Name,Author,Category,ISBN,Total Copies,Price\n";
+
+    const example =
+      "Clean Code,Robert C. Martin,Programming,9780132350884,5,500\n";
+
+    const csvContent = headers + example;
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "book-import-template.csv";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
+
+  // ---------------------------------------
+  // COMMON STYLES
+  // ---------------------------------------
 
   const inputClass = `
     w-full
-    h-19
+    h-14
     rounded-xl
-    border
+    border-8
     border-[var(--border)]
     bg-[var(--bg-card)]
-    px-5
-    py-2.5
+    px-4
     text-sm
-    text-white
+    text-[var(--text-primary)]
     placeholder:text-slate-400
     outline-none
     transition
+    focus:border-[var(--primary)]
     focus:ring-2
-    focus:ring-[var(--primary)]
-`;
+    focus:ring-[var(--primary)]/20
+  `;
 
   const labelClass = `
     block
-    mb-1.5
+    mb-4      
     text-sm
     font-medium
     text-slate-300
-`;
+  `;
 
   return (
-    <Modal onClose={onClose} width="md">
-      {/* HEADER */}
+    <Modal title="📚 Add Book" onClose={onClose} width="md">
+      {/* DESCRIPTION */}
 
-      <div
+      <p
         className="
-        flex
-        items-start
-        justify-between
-        mb-7
-        "
-      >
-        <div>
-          <h2
-            className="
-            text-xl
-            font-bold
-            text-white
-            flex
-            gap-2
-            items-center
-            "
-          >
-            📚 Add Book
-          </h2>
-
-          <p
-            className="
-            mt-2
-            text-sm
-            text-slate-400
-            "
-          >
-            Add one book manually or import from Excel.
-          </p>
-        </div>
-      </div>
-
-      {/* BULK IMPORT */}
-
-      <div
-        className="
-        mb-8
-        rounded-2xl
-        border
-        border-[var(--border)]
-        bg-[var(--bg-card)]
-        p-5
-        "
-      >
-        <div
-          className="
-          flex
-          items-center
-          gap-2
-          mb-4
+          -mt-5
+          mb-6
           text-sm
-          font-semibold
-          text-white
-          "
-        >
-          <FileSpreadsheet size={18} />
-          Bulk Import
+          text-[var(--text-secondary)]
+        "
+      >
+        Add one book manually or import multiple books from Excel.
+      </p>
+
+      {/* -------------------------------- */}
+      {/* BULK IMPORT */}
+      {/* -------------------------------- */}
+
+      <div
+        className="
+          mb-7
+          rounded-2xl
+          border
+          border-[var(--border)]
+          bg-[var(--bg-card)]
+          p-5
+        "
+      >
+        {/* CARD HEADER */}
+
+        <div className="mb-4 flex items-center gap-2">
+          <div
+            className="
+              flex
+              h-8
+              w-8
+              items-center
+              justify-center
+              rounded-lg
+              bg-[var(--primary)]/10
+              text-[var(--primary)]
+            "
+          >
+            <FileSpreadsheet size={17} />
+          </div>
+
+          <div>
+            <h3
+              className="
+                text-sm
+                font-semibold
+                text-[var(--text-primary)]
+              "
+            >
+              Bulk Import
+            </h3>
+
+            <p
+              className="
+                mt-0.5
+                text-xs
+                text-[var(--text-secondary)]
+              "
+            >
+              Add multiple books using an Excel file.
+            </p>
+          </div>
         </div>
 
-        <div
-          className="
-          flex
-          gap-3
-          "
-        >
+        {/* BUTTONS */}
+
+        <div className="flex flex-wrap gap-3">
           <Button
-            onClick={uploadExcel}
+            onClick={handleUploadClick}
             className="
-            rounded-xl
-            px-5
+              rounded-xl
+              px-5
             "
           >
             <Upload size={16} />
@@ -163,18 +230,24 @@ export default function AddBookModal({ onClose }: Props) {
           </Button>
 
           <button
+            type="button"
+            onClick={handleDownloadTemplate}
             className="
-            flex
-            items-center
-            gap-2
-            rounded-xl
-            border
-            border-[var(--border)]
-            px-5
-            py-2.5
-            text-sm
-            text-white
-            hover:bg-white/5
+              flex
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-[var(--border)]
+              bg-transparent
+              px-5
+              py-2.5
+              text-sm
+              font-medium
+              text-[var(--text-primary)]
+              transition
+              hover:bg-white/5
             "
           >
             <Download size={16} />
@@ -183,64 +256,91 @@ export default function AddBookModal({ onClose }: Props) {
 
           <input
             ref={fileInputRef}
-            hidden
             type="file"
-            accept=".xlsx"
+            hidden
+            accept=".xlsx,.xls"
             onChange={handleFileChange}
           />
         </div>
       </div>
 
-      {/* FORM */}
+      {/* -------------------------------- */}
+      {/* MANUAL FORM */}
+      {/* -------------------------------- */}
 
       <div
         className="
- grid
- grid-cols-2
- gap-x-5
- gap-y-5
- "
+          grid
+          grid-cols-2
+          gap-x-8
+          gap-y-10
+          
+        "
       >
-        {[
-          {
-            label: "Book Name",
-            name: "bookName",
-            placeholder: "Enter book name",
-          },
-          {
-            label: "Author",
-            name: "author",
-            placeholder: "Enter author",
-          },
-          {
-            label: "Category",
-            name: "category",
-            placeholder: "Computer Science",
-          },
-          {
-            label: "ISBN",
-            name: "isbn",
-            placeholder: "978-XXXXXXXXXX",
-          },
-        ].map((field) => (
-          <div key={field.name} className="space-y-2">
-            <label className={labelClass}>{field.label}</label>
+        {/* BOOK NAME */}
 
-            <input
-              name={field.name}
-              value={(formData as any)[field.name]}
-              placeholder={field.placeholder}
-              onChange={handleChange}
-              className={inputClass}
-            />
-          </div>
-        ))}
+        <div>
+          <label className={labelClass}>Book Name</label>
 
-        <div className="space-y-1.5">
+          <input
+            name="bookName"
+            value={formData.bookName}
+            onChange={handleChange}
+            placeholder="Enter book name"
+            className={inputClass}
+          />
+        </div>
+
+        {/* AUTHOR */}
+
+        <div>
+          <label className={labelClass}>Author</label>
+
+          <input
+            name="author"
+            value={formData.author}
+            onChange={handleChange}
+            placeholder="Enter author"
+            className={inputClass}
+          />
+        </div>
+
+        {/* CATEGORY */}
+
+        <div>
+          <label className={labelClass}>Category</label>
+
+          <input
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            placeholder="Computer Science"
+            className={inputClass}
+          />
+        </div>
+
+        {/* ISBN */}
+
+        <div>
+          <label className={labelClass}>ISBN</label>
+
+          <input
+            name="isbn"
+            value={formData.isbn}
+            onChange={handleChange}
+            placeholder="978-XXXXXXXXXX"
+            className={inputClass}
+          />
+        </div>
+
+        {/* TOTAL COPIES */}
+
+        <div>
           <label className={labelClass}>Total Copies</label>
 
           <input
             type="number"
+            min="1"
             name="totalCopies"
             value={formData.totalCopies}
             onChange={handleChange}
@@ -248,11 +348,14 @@ export default function AddBookModal({ onClose }: Props) {
           />
         </div>
 
-        <div className="space-y-1.5">
+        {/* PRICE */}
+
+        <div>
           <label className={labelClass}>Price</label>
 
           <input
             type="number"
+            min="0"
             name="price"
             value={formData.price}
             onChange={handleChange}
@@ -261,23 +364,28 @@ export default function AddBookModal({ onClose }: Props) {
         </div>
       </div>
 
+      {/* -------------------------------- */}
       {/* FOOTER */}
+      {/* -------------------------------- */}
 
       <div
         className="
-        mt-6
-        pt-8
-        border-t
-        border-[var(--border)]
-        flex
-        justify-end
-        gap-2
+          mt-8
+          flex
+          justify-end
+          gap-2
+          border-t
+          border-[var(--border)]
+          pt-4
         "
       >
         <Button
           variant="secondary"
           onClick={onClose}
-          className="rounded-xl px-6"
+          className="
+            rounded-xl
+            px-6
+          "
         >
           Cancel
         </Button>
@@ -285,7 +393,10 @@ export default function AddBookModal({ onClose }: Props) {
         <Button
           loading={createBookMutation.isPending}
           onClick={handleSubmit}
-          className="rounded-xl px-6"
+          className="
+            rounded-xl
+            px-6
+          "
         >
           Save Book
         </Button>
