@@ -14,10 +14,7 @@ export const useDeleteRequest = () => {
     onSuccess: () => {
       toast.success("Request deleted successfully");
 
-      invalidateAppData(queryClient, {
-        requests: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {

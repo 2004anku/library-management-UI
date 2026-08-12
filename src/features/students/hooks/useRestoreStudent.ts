@@ -14,10 +14,7 @@ export const useRestoreStudent = () => {
     onSuccess: () => {
       toast.success("Student restored successfully");
 
-      invalidateAppData(queryClient, {
-        students: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
 
       queryClient.invalidateQueries({
         queryKey: studentKeys.archived,

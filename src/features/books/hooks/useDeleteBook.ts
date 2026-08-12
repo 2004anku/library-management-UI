@@ -45,10 +45,7 @@ export const useDeleteBook = () => {
 
     // Sync with backend
     onSettled: () => {
-      invalidateAppData(queryClient, {
-        books: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
   });
 };

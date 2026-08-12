@@ -20,12 +20,7 @@ export const useAssignBook = () => {
     onSuccess: () => {
       toast.success("Book assigned successfully");
 
-      invalidateAppData(queryClient, {
-        requests: true,
-        books: true,
-        students: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {

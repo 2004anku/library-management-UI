@@ -23,10 +23,7 @@ export const useCreateStudent = () => {
     onSuccess: () => {
       toast.success("Student created successfully");
 
-      invalidateAppData(queryClient, {
-        students: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {

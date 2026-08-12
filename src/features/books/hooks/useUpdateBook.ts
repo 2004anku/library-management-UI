@@ -21,10 +21,7 @@ export const useUpdateBook = () => {
     onSuccess: () => {
       toast.success("Book updated successfully");
 
-      invalidateAppData(queryClient, {
-        books: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {

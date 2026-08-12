@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { bookKeys } from "./bookKeys";
 import { createBook } from "../services/book.service";
 import type { CreateBookPayload } from "../types/bookType";
 import { invalidateAppData } from "@/lib/query/invalidateAppData";
@@ -15,10 +14,7 @@ export const useCreateBook = () => {
     onSuccess: () => {
       toast.success("Book created successfully");
 
-      invalidateAppData(queryClient, {
-        books: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {

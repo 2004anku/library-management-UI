@@ -14,12 +14,7 @@ export const useAcceptReturnRequest = () => {
     onSuccess: () => {
       toast.success("Book returned successfully");
 
-      invalidateAppData(queryClient, {
-        requests: true,
-        books: true,
-        students: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {

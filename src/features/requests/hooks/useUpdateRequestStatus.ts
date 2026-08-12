@@ -15,10 +15,7 @@ export const useUpdateRequestStatus = () => {
     onSuccess: () => {
       toast.success("Request updated successfully");
 
-      invalidateAppData(queryClient, {
-        requests: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {

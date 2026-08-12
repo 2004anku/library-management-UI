@@ -14,10 +14,7 @@ export const useRestoreBook = () => {
     onSuccess: () => {
       toast.success("Book restored successfully");
 
-      invalidateAppData(queryClient, {
-        books: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
 
       queryClient.invalidateQueries({
         queryKey: bookKeys.archived,

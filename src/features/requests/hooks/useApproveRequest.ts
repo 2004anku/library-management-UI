@@ -52,12 +52,7 @@ export const useApproveRequest = () => {
     onSuccess: () => {
       toast.success("Request approved successfully");
 
-      invalidateAppData(queryClient, {
-        requests: true,
-        books: true,
-        students: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     // Sync with backend

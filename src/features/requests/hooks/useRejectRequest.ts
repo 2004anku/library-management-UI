@@ -14,10 +14,7 @@ export const useRejectRequest = () => {
     onSuccess: () => {
       toast.success("Request rejected successfully");
 
-      invalidateAppData(queryClient, {
-        requests: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {

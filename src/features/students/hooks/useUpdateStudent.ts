@@ -22,10 +22,7 @@ export const useUpdateStudent = () => {
     onSuccess: () => {
       toast.success("Student updated successfully");
 
-      invalidateAppData(queryClient, {
-        students: true,
-        dashboard: true,
-      });
+      invalidateAppData(queryClient);
     },
 
     onError: (error) => {
