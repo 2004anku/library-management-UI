@@ -1,12 +1,12 @@
 import api from "@/lib/axios/axios";
 
 export const getDashboardStatsApi = async () => {
-  return await api.get("/admin/dashboard/stats");
+  return await api.get("/library-admin/dashboard/stats");
 };
 
 export const searchStudentsApi = async (query: string) => {
-  return await api.get(`/admin/dashboard/search-students?q=${query}`);
+  return await api.get(`/library-admin/dashboard/search-students?q=${query}`);
 };
 export const getDashboardChartsApi = async () => {
-  return await api.get("/admin/dashboard/charts");
+  return await api.get("/library-admin/dashboard/charts");
 };

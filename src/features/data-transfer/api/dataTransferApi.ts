@@ -9,7 +9,7 @@ export const previewBooksApi = async (file: File) => {
 
   formData.append("file", file);
 
-  return api.post("/admin/data-transfer/books/preview", formData, {
+  return api.post("/library-admin/data-transfer/books/preview", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -17,7 +17,7 @@ export const previewBooksApi = async (file: File) => {
 };
 
 export const importBooksApi = async (data: unknown[]) => {
-  return api.post("/admin/data-transfer/books/import", {
+  return api.post("/library-admin/data-transfer/books/import", {
     data,
   });
 };
